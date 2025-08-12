@@ -881,4 +881,4 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   );
 };
 
-export default LeaveManagement;
+export default React.memo(LeaveManagement);

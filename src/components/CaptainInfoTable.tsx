@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 import { realCaptainsData } from "../data/captainsData";
@@ -131,16 +131,16 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     }
   };
 
-  const handleCaptainFieldChange = (field: keyof Captain, value: string | string[] | Captain['durum']) => {
+  const handleCaptainFieldChange = useCallback((field: keyof Captain, value: string | string[] | Captain['durum']) => {
     if (selectedCaptain) {
       setSelectedCaptain({
         ...selectedCaptain,
         [field]: value
       });
     }
-  };
+  }, [selectedCaptain]);
 
-  const handleEhliyetChange = (port: keyof Captain['tumEhliyetler'], checked: boolean) => {
+  const handleEhliyetChange = useCallback((port: keyof Captain['tumEhliyetler'], checked: boolean) => {
     if (selectedCaptain) {
       const newEhliyetler = {
         ...selectedCaptain.tumEhliyetler,
@@ -165,7 +165,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
         durum
       });
     }
-  };
+  }, [selectedCaptain]);
 
   const handleMelbusatChange = (item: keyof Captain['melbusat'], value: string) => {
     if (selectedCaptain) {
@@ -760,4 +760,4 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
   );
 };
 
-export default CaptainInfoTable;
+export default React.memo(CaptainInfoTable);

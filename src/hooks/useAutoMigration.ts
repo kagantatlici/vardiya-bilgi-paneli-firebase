@@ -11,17 +11,25 @@ export function useAutoMigration() {
 
     const initializeDatabase = async () => {
       try {
-        // Quick check - only verify captains exist
-        const existingCaptains = await CaptainService.getAllCaptains();
-        
-        if (existingCaptains.length === 0 && mounted) {
-          // No data exists, run full migration silently
-          await migrateAllData();
-        }
-        
+        // First, mark as initialized immediately for fast UI
         if (mounted) {
           setIsInitialized(true);
         }
+
+        // Then check and migrate in background
+        setTimeout(async () => {
+          try {
+            const existingCaptains = await CaptainService.getAllCaptains();
+            
+            if (existingCaptains.length === 0 && mounted) {
+              // No data exists, run full migration silently in background
+              await migrateAllData();
+            }
+          } catch (error) {
+            // Silent error - don't break the UI
+          }
+        }, 0);
+        
       } catch {
         if (mounted) {
           setHasError(true);

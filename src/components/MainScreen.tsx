@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, startTransition } from "react";
 import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
@@ -27,17 +27,21 @@ const MainScreen: React.FC = () => {
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
 
-  const openExternalLink = (url: string) => {
+  const openExternalLink = useCallback((url: string) => {
     window.open(url, "_blank");
-  };
+  }, []);
 
-  const navigateTo = (view: View) => {
-    setCurrentView(view);
-  };
+  const navigateTo = useCallback((view: View) => {
+    startTransition(() => {
+      setCurrentView(view);
+    });
+  }, []);
 
-  const goBack = () => {
-    setCurrentView("main");
-  };
+  const goBack = useCallback(() => {
+    startTransition(() => {
+      setCurrentView("main");
+    });
+  }, []);
 
   // Real shift data (full version from ShiftCalendar)
   const createShiftData = (): ShiftData => {
@@ -222,13 +226,13 @@ const MainScreen: React.FC = () => {
     };
   };
 
-  // Function to get active pilot count (only "Aktif" status pilots with non-empty names)
-  const getActivePilotCount = (): number => {
+  // Memoized active pilot count calculation
+  const activePilotCount = useMemo((): number => {
     return realCaptainsData.filter(captain => 
       captain.durum === "Aktif" && 
       captain.isim.trim() !== ""
     ).length;
-  };
+  }, [realCaptainsData]);
 
   // Function to get pilots on leave for a specific shift
   const getPilotsOnLeaveForShift = (shiftNumber: number): string[] => {
@@ -263,7 +267,6 @@ const MainScreen: React.FC = () => {
 
   // Function to calculate working and leave counts for a shift
   const calculateShiftCounts = (shiftNumber: number): { working: number; onLeave: number } => {
-    const activePilotCount = getActivePilotCount();
     const pilotsOnLeave = getPilotsOnLeaveForShift(shiftNumber);
     const onLeaveCount = pilotsOnLeave.length;
     const workingCount = activePilotCount - onLeaveCount;
@@ -305,23 +308,23 @@ const MainScreen: React.FC = () => {
   };
 
   // Navigation functions
-  const goToPreviousMonth = () => {
+  const goToPreviousMonth = useCallback(() => {
     if (currentMonth === 0) {
       setCurrentYear(currentYear - 1);
       setCurrentMonth(11);
     } else {
       setCurrentMonth(currentMonth - 1);
     }
-  };
+  }, [currentMonth, currentYear]);
 
-  const goToNextMonth = () => {
+  const goToNextMonth = useCallback(() => {
     if (currentMonth === 11) {
       setCurrentYear(currentYear + 1);
       setCurrentMonth(0);
     } else {
       setCurrentMonth(currentMonth + 1);
     }
-  };
+  }, [currentMonth, currentYear]);
 
   // Render calendar grid
   const renderCalendarGrid = () => {
@@ -661,8 +664,6 @@ const MainScreen: React.FC = () => {
               fontWeight: "500",
               cursor: "pointer",
             }}
-            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#0e7490"}
-            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#0891b2"}
           >
             <span style={{ fontSize: "18px" }}>⚙️</span>
             <span style={{ textAlign: "center", lineHeight: "1.2" }}>Vardiya Takvimi Oluştur</span>
@@ -848,4 +849,4 @@ const MainScreen: React.FC = () => {
   );
 };
 
-export default MainScreen;
+export default React.memo(MainScreen);

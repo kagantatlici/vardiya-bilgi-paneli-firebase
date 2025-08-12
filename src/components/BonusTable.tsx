@@ -257,4 +257,4 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
   );
 };
 
-export default BonusTable;
+export default React.memo(BonusTable);
