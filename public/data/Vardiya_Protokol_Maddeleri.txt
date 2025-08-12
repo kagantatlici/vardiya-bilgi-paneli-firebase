@@ -1,0 +1,179 @@
+İSTANBUL BOĞAZI
+3.VARDİYA PROTOKOLÜ
+(Son Revizyon Tarihi: 02 Nisan 2025)
+Madde 01: Vardiya giriş sıralaması, bir önceki vardiya çıkış sırasına sadık
+kalınarak yapılan sıralama olup bu sıralama, her vardiya başında ve her
+istasyon için ayrı ayrı hazırlanır. Örnek: İnciburnu vardiyaya sırası
+hazırlanırken, önce İnciburnu’nda vardiyadan çıkanlar sıralanır. Bir önceki
+vardiyada sıra başı olan, vardiyaya önce girer. Aynı şekilde Büyükliman’da
+vardiyadan çıkanların sıralaması yapılır ve bu sıralama İnciburnu sırasının
+sonuna eklenir. (Her ne kadar istisnai bir durum olsa da, gerektiğinde
+Büyükliman vardiya sırası da yukardaki prosedürün Büyükliman istasyonuna
+uyarlanması ile yapılır)
+Madde 02: Kılavuzlu gemilerin birbirini geçme durumu, vardiya sıralamasını
+değiştirmez. Örnek: Bir kılavuz, Boğaz etabını önündeki üç gemiyi geçerek
+tamamlasa dahi, diğer etabına yine ilk listedeki eski yerinde devam eder.
+Madde 03: Vardiya girişlerinde yeterli sayıda gemi olmaz ise, gemi sayısı
+kadar kılavuz kaptan baştan sıralanır, kalanlar takviye gider. Bu sebeple
+kılavuz kaptanlar, vardiya girişlerinde istasyona geliş saatini geciktirmez. Her
+an değişen takviye pozisyonları için bu durum son derece önemlidir ve
+titizlikle uyulmalıdır. Bu ehemmiyet, vardiya içerisinde herhangi bir yönde
+trafiğin açılması durumunda da geçerlidir.
+Madde 04: (Sadece) Vardiya girişlerinde takviye giden kılavuz kaptanlar,
+takviye gittikleri istasyonda, vardiyaya o istasyondan giren kılavuz
+kaptanların arkasına, gemi ile gitmiş / gidecek olanların önüne geçerler.
+Madde 05: Vardiya içerisinde takviye giden kılavuz kaptanlar, takviye
+yapılan istasyondaki kılavuz kaptanların sonuna geçerler. Sıra, değişmeden
+aynı şekilde devam eder. Fakat herhangi bir sebeple, (aralıksız) üst üste 2
+takviyeye gitmek durumunda kalan kılavuz kaptanlar, gittikleri istasyonda
+sıra başına geçerler.
+Madde 06: Takviye ihtiyacı var gibi gözüken fakat takviye yapılmadan da
+gemi planlamasının aksamadan işletilebileceği durumlarda, takviyesiz
+çözüm yoluna öncelik verilir ve böyle bir durum oluştuğunda, “Herkese Eşit
+Gemi Sayısı” kuralına bakılmaksızın, ihtiyaç duyulan istasyonda hazır
+bulunan kılavuz kaptanlar görevlendirilir. Örnek: Kuzey-Güney gemi
+trafiğinin 10 adet kılavuzlu gemi sonrası kapanacağı bir durumda, aynı
+vardiyada daha önce takviye yapmış 10 kişilik ilk grup Büyüklimanda
+bulunuyor iken, ikinci 10 kişilik grubun İnciburnu’ndan takviye gelmesi
+yerine, halihazırdaki Büyükliman’da bulunan 10 kişilik ilk grubun gemilere
+yönlendirilmesi tercih edilir.
+Madde 07: Sıra konusu ile ilgili becayiş yapılması durumunda; becayişi
+yapan kılavuz kaptan, becayiş yapılan kılavuz kaptanın sırasına girer.
+Madde 08: Normal senelik izin kullanan kılavuz kaptan, vardiyaya sıra başı
+olarak girer. (Ayrıca, minimum 2 gün, yani bir vardiyalık “sendika izni”
+kullanan kılavuz kaptan da, ilk vardiyaya sıra başı girer)
+Madde 09: Baş Kılavuz Kaptan’dan idari izin isteyen ve vardiya bitiminden
+önce istasyondan ayrılan kılavuz kaptan, sonraki vardiyada sıra sonu olur.
+Madde 10: Vardiya içerisinde kısa süreli (saatlik) izin kullanan kılavuz
+kaptan, döndüğünde eğer sırası geçmişse, bulunduğu istasyonda sıranın
+sonuna geçer, sırası geçmemişse kendi sırasında devam eder.
+Madde 11: Bir gemiye giden kılavuz kaptan, herhangi bir sebepten dolayı
+(Arıza, Yetersizlik, Çarmıh, Pervane…) gemiyi reddettiğinde, gemiye
+çıkılmamış ise, ERP’de “Hizmet Verilemedi” seçeneğini de işaretleyerek,
+gemiye çıkılmış ise standart şekilde “Bill” düzenler ve vardiya sıra düzenini
+bozmamak adına (kendi kısmeti olarak değerlendirerek) sıra sonuna geçer.
+Madde 12: İhtiyaç duyulması halinde, ihtiyaç duyulan istasyondaki,
+vardiyaya en son dahil olan, Türk Boğazları Ehliyetine sahip 2 kılavuz
+kaptan, All the Way (AtW) sırasının başı kabul edilir. AtW etaba çıkması
+gereken kılavuz kaptan, vardiyamızdan bir kılavuz kaptan ile AtW sırasını
+becayiş edebilir. Kendi isteğiyle AtW giden kılavuz kaptanın AtW sırası
+değişmez. AtW etaba giden kişi, sırasını savmış olur.
+Madde 13: AtW etaptan gelen kılavuz kaptanlar, istasyona döndüklerinde
+vardiya sırasının sonuna geçerler.
+Madde 14: Vardiya çıkış günü, ihtiyaç duyulması halinde, baş kılavuz
+kaptanın planlaması ile uygun durumda bulunan bir kılavuz kaptan, öğlen
+12:00’ye kadar Büyükliman İstasyonunda nöbetçi olarak bulunur.
+Madde 15: “Gemilere Angaje Olma Durumu”, yaklaşan bir geminin 5 mil
+sınırına girmesinden itibaren uygulanmaya başlar. Örnek: Trafik Güney’den
+Kuzey’e devam etmekte iken, Kuzey’den beklemesiz geçiş kapsamında olan
+bir gemi 5 mil sınırına girdiğinde; o esnada Büyükliman 1. Sırada olan
+kılavuz kaptan gemiye angaje olur.
+Madde 16: Takviye yapılacağı zamanlarda veya takviye esnasında, gemiler
+5 mil sınırına girdiğinde sıra başındaki kılavuz kaptanlar, sırasıyla ilgili
+gemilere angaje olurlar.
+Madde 17: Boğaz içerisinde arıza yapan kılavuzsuz gemiye gitme,
+demirden acil gemi kaldırma, Haydarpaşa’dan kalkan gemiye katılma … gibi
+acil & ekstra bir durum oluşması halinde, “Angaje Olma Kuralı” uygulanmaz.
+Böyle durumlarda, acil & ekstra durum içerisindeki gemiye yönlendirilecek
+kılavuz, Baş Kılavuz Kaptanın bilgisi dahilinde gözcüler tarafından belirlenir,
+bu husus ile ilgili görevli personele müdahalede bulunulmaz.
+Madde 18: “Etap Olmasa da” sadece demirleme veya sadece demirden
+gemi kaldırma manevralarına gidenler iş yapmış sayılır ve istasyona
+döndüğünde, eğer istasyona geliş varsa, en son gelenin arkasına, eğer
+istasyondan gidiş varsa, mevcut sıranın sonuna geçerler. (Kuzey-Güney
+Etap sonrası A Demir Bölgesi’ne giden Yolcu Gemilerinde, geminin demir
+attığı saat baz alınarak sıraya girilir)
+Madde 19: Gemiye katılış sürecinde, (Pilot mevkiinde) gemilerin birbirlerini
+geçmesi halinde, botun hangi gemiye önce gideceği hususunda, sıralamayı
+yapan ve uygulayan görevli personele “Emniyet tedbiri konuları hariç olmak
+üzere” müdahalede bulunulmaz. Gemilerin birbirini geçmesi yani yaklaşan
+gemilerin kendi aralarında sıralarının değişmesi durumlarında gemiye
+binişler, listedeki standart vardiya sırasına göre yapılır. (Junior Kılavuz
+sınırlamaları hariç tutulmak üzere, gemilerin değişmesi normal karşılanır)
+Madde 20: Kıdem esaslı fikir belirtme, seçim yapma veya vardiyadan daimi
+olarak ayrılan kılavuz kaptanın kamarasına geçme konularında, sıralama,
+kılavuzluk hizmeti kıdemine göre değil, “3.Vardiya Kadrosuna Aktif Giriş
+Kıdemi” ne bakılarak yapılır. Öncelik, teamüller gereği Baş Kılavuz ve Baş
+Kılavuz Vekilinden başlamak üzere, 3.Vardiya ana kadrosundaki en eski
+kılavuz kaptanda olur. Vardiyaya aynı gün dahil olan yeni kılavuz kaptanlar,
+önceki kıdemleri ne olursa olsun eşit kabul edilir ve vardiya içi kıdem
+sıralarını kura ile belirler. Stajyer kılavuz kaptanlar, ehliyetlerini alıp aktif
+görev başlangıçlarına göre kıdem sırasına eklenir, eşitlik durumunda kura
+çekilir.
+Madde 21: Etap + Demirleme, Etap + Yanaşma gibi tek seferde iki iş yapan
+kılavuz kaptanlar, istasyona geldiğinde sıra sonuna geçer.
+Madde 22: Gemiden ayrılışlarda Pilot Botu, Kuzey’de Kavak Burnu’nu
+bordalayan gemiyi, Güney’de Dolmabahçe Sarayı’nı bordalayan gemiyi
+(iskelebaşı yapmadan) bekler. Yaklaşan gemiler, belirtilen referans
+noktalardan daha önce bir pozisyonda ise, bot beklemeksizin iskele başı
+yapar. Kötü hava / deniz şartlarında bu madde geçerliliğini yitirir, sadece Baş
+Kılavuz Kaptanın talimatı doğrultusunda hareket edilir. (Bu madde için,
+Kuzey’de İstasyon hizası, Güney’de Ahırkapı Feneri hizası rutin gemiden
+ayrılma pozisyonu olarak düşünülmüştür)
+Madde 23: Gemiden ayrılışlarda, gemiler mümkün olduğunca borda
+bordaya bırakılmaz. Bu durumun oluşmaması için gereken tedbir önceden
+alınır.
+Madde 24: Vardiya çıkışında birinci sırada vardiyayı bitiren kılavuz kaptan,
+İnciburnu Kılavuzluk İstasyonu’nda saat 10:00’a kadar nöbetçi kalır; yerine
+başka bir nöbetçi bulmadan veya sıradaki vardiyaya nöbeti teslim etmeden
+istasyonu terk etmez.
+Madde 25: Vardiya çıkış günü, diğer vardiyanın giriş saati gelmeden, son
+gemisini, diğer vardiyadan başka bir pilota veren kılavuz kaptan, iş yapmış
+kabul edilir. Bu durum, “Herkese Eşit Sayıda Gemi” kuralı kapsamımda
+değerlendirilmez, sonraki vardiyada kendi sırasına girer, sıra başı olmaz.
+Madde 26: Kıdemsiz (Junior) kılavuz kaptan gemi planlaması, “İlk 3 ay 150
+metreye kadar, ikinci 3 ay 200 metreye kadar, üçüncü 3 ay 250 metreye
+kadar, dokuzuncu ay sonunda da sınırsız” şekilde yapılır. Bu planlama, Baş
+Kılavuz Kaptan’ın insiyatifinde olup gerek görüldüğü taktirde belirtilen süreler
+esnetilebilir.
+Madde 27: Kıdemsiz (Junior) kılavuz kaptanların gemi alış sırası yapılırken
+veya gemiye binişlerinde binecekleri gemi boyut / tonaj olarak kendilerine
+uygun olmayan bir gemi çıktığında, bu kılavuzlar ön sıra - arka sıra fark
+etmeksizin kendilerine en yakın taraftaki uygun gemiye yönlendirilirler, eşitlik
+olması durumunda öncelikli tercih ön sıradaki gemiler olur. Gemisi
+değiştirilen kıdemsiz (Junior) kılavuz kaptanlar, yeni girdiği sırasında
+vardiyasına devam eder, eski yerine geçmez.
+Madde 28: Takviye grubu ile birlikte gitmek yerine, takviyeye herhangi bir
+pilotun yanında yolcu olarak giden kılavuz kaptan, gittiği kılavuzluk
+istasyonuna erken veya geç varmış sayılmaz, kendi sırasında devam eder.
+Madde 29: Yaz izin dönemi, okulların kapanacağı tarihin bir hafta öncesi ile
+açılacağı tarihin bir hafta sonrası aralığını kapsar. Yaz dönemi izinleri, her yıl
+Mart Ayının ilk haftası, önce talep toplama, sonrasında çakışma oluşur ise
+de kura aşamaları ile netleştirilir. Aynı anda kaç kişinin izine çıkabileceğine
+Baş Kılavuz Kaptan karar verir. Bir kişi normal şartlarda yaz döneminde en
+fazla 2 parça yani 2 vardiya izin kullanabilir. Kılavuz kaptanlar, kendi
+aralarında izin periyotlarını becayiş yapabilir. Bir kişi, planlamanın netlik
+kazanmasına müteakip, iznini iptal etmek istediğinde gecikmeden ön bildirim
+yapmakla yükümlüdür. Planlı izin başlangıcının 15 gün öncesine kadar ön
+bildirim yapmayanlar (iznini iptal etmeyenler), belirttiği tarihe izin yazmak
+mecburiyetinde kalır.
+Madde 30: Acil durumlar haricinde, Baş Kılavuz Kaptan dışında kimse, gemi
+planlaması için VTS’i arayamaz.
+Madde 31: Vardiyanın son günü, özel bir durum yoksa, saat 09:00’da
+Büyükliman’dan İnciburnu’na araç servisi kalkar.
+Madde 32: Gözcü arkadaşlarımızla olan iş ilişkileri telefonla yapılır. Çalışma
+saatleri sırasında gözcülerin dikkatlerini dağıtmamak adına, acil durumlar
+haricinde gözcü kulesine çıkılmaz, aşağıdan yukarıya bağırarak gözcüler ile
+iletişim kurulmaz.
+Madde 33: Kumanya paraları her ayın başında, 3.Vardiya kumanya
+sorumlusunun yönlendirmeleri doğrultusunda, hesaba EFT yöntemi ile
+toplanır. Yapılacak alımların aksamaması için ödemeler geciktirilmez.
+Madde 34: İstasyonlarda, araba ve pilot motorlarında, toplu yaşam ve
+nezaket kurallarına uyulur. Herkes, saygı - sevgi - hoşgörü ve iyi niyet
+çerçevesinde hareket eder. Salonlarda sigara içilmez, gürültü yapılmaz.
+Madde 35: Baş Kılavuz Kaptan, vardiya içi uygulamalarda her türlü insiyatife
+sahip olup, rutin zamanlarda ve Baş Kılavuz Kaptanın aksini istemediği
+durumlarda, bu protokoldeki maddeler daimi olarak geçerlidir.
+Madde 36: Protokolde belirtilen konular, sadece belli başlı durumları
+kapsamakta olup bu başlıkların haricinde muhtemel birçok ekstra durumun
+ortaya çıkması kaçınılmazdır. Bu gibi ekstra durumlarda çözüm için Baş
+Kılavuz Kaptana danışılır.
+Madde 37: Bu protokoldeki yazılı maddeler, vardiya içi uygulamaların
+standardizasyonu ve herkesin her durumda eşit haklara sahip olması ilkesi
+düşünülerek hazırlanmış olup İstanbul Boğazı 3.Vardiyadaki çoğunluğun
+onayı doğrultusunda uygulamaya konulmuştur.
+Yürütmekte olduğumuz bu ekip çalışmasında, Hizmet Kalitesi, İş Huzuru,
+İş Barışı, Ekip Ruhu, Kurumsal İmaj ve Profesyonellik gibi bizi biz yapan
+değerlere sahip çıkmanın önemini bir kez daha hatırlatır, hepimize kazasız
+belasız, iyi çalışmalar dileriz..
+Allah Selamet Versin…
