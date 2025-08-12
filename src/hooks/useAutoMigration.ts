@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CaptainService, ShiftService } from '../services/database';
+import { CaptainService } from '../services/database';
 import { migrateAllData } from '../scripts/migrate-data';
-import { clearAndRemigrate } from '../scripts/clear-and-remigrate';
 
 export function useAutoMigration() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -12,16 +11,12 @@ export function useAutoMigration() {
 
     const initializeDatabase = async () => {
       try {
-        // Check if data already exists
+        // Quick check - only verify captains exist
         const existingCaptains = await CaptainService.getAllCaptains();
-        const existingShifts = await ShiftService.getAllShifts();
         
         if (existingCaptains.length === 0 && mounted) {
           // No data exists, run full migration silently
           await migrateAllData();
-        } else if (existingShifts.length < 1000 && mounted) {
-          // Incomplete shift data, run full shift migration
-          await clearAndRemigrate();
         }
         
         if (mounted) {
