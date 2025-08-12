@@ -5,33 +5,6 @@ import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
 import { realCaptainsData } from "../data/captainsData";
 
-interface Captain {
-  id: number;
-  sicilNo: string;
-  isim: string;
-  aisMobNo: string;
-  aktifEhliyetler: string[];
-  tumEhliyetler: {
-    istanbul: boolean;
-    canakkale: boolean;
-    hpasa: boolean;
-    kepez: boolean;
-    izmir: boolean;
-    mersin: boolean;
-    zonguldak: boolean;
-  };
-  melbusat: {
-    pantolon: string;
-    gomlek: string;
-    tshirt: string;
-    yelek: string;
-    polar: string;
-    mont: string;
-    ayakkabi: string;
-  };
-  durum: "Aktif" | "Pasif";
-}
-
 type View = "main" | "captains" | "protocol" | "bonus" | "leave";
 
 interface ShiftData {

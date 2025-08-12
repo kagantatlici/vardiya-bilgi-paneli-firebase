@@ -44,7 +44,7 @@ interface LeaveManagementProps {
 }
 
 const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
-  const { toasts, showSuccess, showInfo, removeToast } = useToast();
+  const { toasts, showSuccess, removeToast } = useToast();
   // Captain data from CaptainInfoTable
   const realCaptainsData: Captain[] = [
     { id: 1, sicilNo: "51793", isim: "Harun DOKUZ (BK)", aisMobNo: "972410883", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
@@ -282,7 +282,13 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       }));
     }
 
-    handleSummerLeaveChange(weekNumber, 'approved', approved);
+    // Update approved status directly in summer leave data
+    setSummerLeaveData(prev => prev.map(week => {
+      if (week.weekNumber === weekNumber) {
+        return { ...week, approved };
+      }
+      return week;
+    }));
   };
 
   // Filter data by month
