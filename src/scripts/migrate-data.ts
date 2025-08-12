@@ -1,5 +1,6 @@
-import { CaptainService, LeaveService, ShiftService } from '../services/database';
+import { CaptainService, LeaveService } from '../services/database';
 import { realCaptainsData } from '../data/captainsData';
+import { migrateFullShiftCalendar } from './migrate-full-shifts';
 
 // Migration script to populate Firestore with existing data
 export async function migrateAllData() {
@@ -9,8 +10,8 @@ export async function migrateAllData() {
   // 2. Migrate Leave Data
   await migrateLeaves();
 
-  // 3. Migrate Shift Data
-  await migrateShifts();
+  // 3. Migrate Full Shift Calendar (2025-2027)
+  await migrateFullShiftCalendar();
 }
 
 async function migrateCaptains() {
@@ -52,47 +53,6 @@ async function migrateLeaves() {
   }
 }
 
-async function migrateShifts() {
-  // Shift data for 2025 (from the existing shift schedule)
-  const shiftSchedule2025 = {
-    // January 2025
-    "2025-01-02": 1, "2025-01-03": 1, "2025-01-04": 1, "2025-01-05": 1, "2025-01-06": 1, "2025-01-07": 1,
-    "2025-01-08": 2, "2025-01-09": 2, "2025-01-10": 2, "2025-01-11": 2, "2025-01-12": 2, "2025-01-13": 2,
-    "2025-01-14": 3, "2025-01-15": 3, "2025-01-16": 3, "2025-01-17": 3, "2025-01-18": 3, "2025-01-19": 3,
-    "2025-01-20": 4, "2025-01-21": 4, "2025-01-22": 4, "2025-01-23": 4, "2025-01-24": 4, "2025-01-25": 4,
-    "2025-01-26": 5, "2025-01-27": 5, "2025-01-28": 5, "2025-01-29": 5, "2025-01-30": 5, "2025-01-31": 5,
-    
-    // February 2025
-    "2025-02-01": 6, "2025-02-02": 6, "2025-02-03": 6, "2025-02-04": 6, "2025-02-05": 6, "2025-02-06": 6,
-    "2025-02-07": 7, "2025-02-08": 7, "2025-02-09": 7, "2025-02-10": 7, "2025-02-11": 7, "2025-02-12": 7,
-    
-    // Add more months as needed - for now focusing on August-September
-    // August 2025
-    "2025-08-15": 38, "2025-08-16": 38, "2025-08-17": 38, "2025-08-18": 38, "2025-08-19": 38, "2025-08-20": 38,
-    "2025-08-21": 39, "2025-08-22": 39, "2025-08-23": 39, "2025-08-24": 39, "2025-08-25": 39, "2025-08-26": 39,
-    "2025-08-27": 40, "2025-08-28": 40, "2025-08-29": 40, "2025-08-30": 40, "2025-08-31": 40,
-    
-    // September 2025
-    "2025-09-01": 40,
-    "2025-09-02": 41, "2025-09-03": 41, "2025-09-04": 41, "2025-09-05": 41, "2025-09-06": 41, "2025-09-07": 41,
-    "2025-09-08": 42, "2025-09-09": 42, "2025-09-10": 42, "2025-09-11": 42, "2025-09-12": 42, "2025-09-13": 42,
-    "2025-09-14": 43, "2025-09-15": 43, "2025-09-16": 43, "2025-09-17": 43, "2025-09-18": 43, "2025-09-19": 43,
-  };
-
-  const shifts = Object.entries(shiftSchedule2025).map(([dateStr, shiftNumber]) => {
-    const date = new Date(dateStr);
-    return {
-      id: dateStr,
-      date: dateStr,
-      shiftNumber: shiftNumber as number,
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDate()
-    };
-  });
-
-  await ShiftService.bulkAddShifts(shifts);
-}
 
 // Export for use in components
 export { migrateAllData as default };
