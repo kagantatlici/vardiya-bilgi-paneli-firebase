@@ -24,7 +24,13 @@ module.exports = {
     'prettier/prettier': ['error'],
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    'no-console': ['warn']
+    'no-console': ['error'], // No console.log in production
+    'no-debugger': ['error'],
+    'no-alert': ['error'],
+    '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/no-explicit-any': ['warn'],
+    'react/prop-types': 'off', // Using TypeScript instead
+    'react/display-name': 'off'
   },
   settings: {
     react: {

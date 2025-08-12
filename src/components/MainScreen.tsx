@@ -3,10 +3,10 @@ import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
-import MigrationUtility from "./MigrationUtility";
+import { useAutoMigration } from "../hooks/useAutoMigration";
 import { realCaptainsData } from "../data/captainsData";
 
-type View = "main" | "captains" | "protocol" | "bonus" | "leave" | "migration";
+type View = "main" | "captains" | "protocol" | "bonus" | "leave";
 
 interface ShiftData {
   [key: string]: number; // "YYYY-MM-DD": shiftNumber
@@ -22,6 +22,7 @@ interface ShiftInfo {
 
 const MainScreen: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>("main");
+  const { isInitialized, hasError } = useAutoMigration();
   const [today] = useState<Date>(new Date());
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
@@ -405,8 +406,45 @@ const MainScreen: React.FC = () => {
     return <LeaveManagement onBack={goBack} />;
   }
 
-  if (currentView === "migration") {
-    return <MigrationUtility onBack={goBack} />;
+
+  // Show loading while initializing database
+  if (!isInitialized) {
+    return (
+      <div style={{ 
+        minHeight: "100vh", 
+        backgroundColor: "#f9fafb",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div>
+          <div style={{ fontSize: "16px", fontWeight: "500", color: "#6b7280" }}>
+            Sistem başlatılıyor...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if database initialization failed
+  if (hasError) {
+    return (
+      <div style={{ 
+        minHeight: "100vh", 
+        backgroundColor: "#f9fafb",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "24px", marginBottom: "16px" }}>⚠️</div>
+          <div style={{ fontSize: "16px", fontWeight: "500", color: "#dc2626" }}>
+            Sistem başlatılamadı. Lütfen sayfayı yenileyin.
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Main menu view
@@ -551,30 +589,6 @@ const MainScreen: React.FC = () => {
             <span style={{ textAlign: "center", lineHeight: "1.2" }}>İzin Yönetimi</span>
           </button>
 
-          <button
-            onClick={() => navigateTo("migration")}
-            style={{
-              backgroundColor: "#dc2626",
-              color: "white",
-              padding: "12px 8px",
-              borderRadius: "8px",
-              border: "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px",
-              minHeight: "80px",
-              fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#b91c1c"}
-            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#dc2626"}
-          >
-            <span style={{ fontSize: "18px" }}>🔄</span>
-            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Database Migration</span>
-          </button>
 
           <button
             onClick={() => navigateTo("captains")}

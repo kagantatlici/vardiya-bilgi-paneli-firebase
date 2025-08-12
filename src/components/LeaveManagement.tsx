@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 
@@ -79,7 +79,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   ];
 
   // Leave weeks data from shift calendar
-  const leaveWeeksData: LeaveWeek[] = [
+  const leaveWeeksData: LeaveWeek[] = useMemo(() => [
     // Ocak
     { weekNumber: 1, dateRange: "5-10 Ocak", month: "Ocak" },
     { weekNumber: 2, dateRange: "11-16 Ocak", month: "Ocak" },
@@ -152,10 +152,10 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     { weekNumber: 58, dateRange: "13-18 Aralık", month: "Aralık" },
     { weekNumber: 59, dateRange: "19-24 Aralık", month: "Aralık" },
     { weekNumber: 60, dateRange: "25-30 Aralık", month: "Aralık" },
-  ];
+  ], []);
 
   // Summer leave periods (20 June - 8 September school closure period)
-  const summerLeaveWeeks: SummerLeaveEntry[] = [
+  const summerLeaveWeeks: SummerLeaveEntry[] = useMemo(() => [
     { weekNumber: 26, startDate: "04 Haziran", endDate: "09 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
     { weekNumber: 27, startDate: "10 Haziran", endDate: "15 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
     { weekNumber: 28, startDate: "16 Haziran", endDate: "21 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
@@ -178,7 +178,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     { weekNumber: 43, startDate: "14 Eylül", endDate: "19 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Turgut KAYA", person3: "", person4: "", person5: "", approved: true },
     { weekNumber: 44, startDate: "20 Eylül", endDate: "25 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
     { weekNumber: 45, startDate: "26 Eylül", endDate: "01 Ekim", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-  ];
+  ], []);
 
   const [selectedPerson, setSelectedPerson] = useState<string>("");
   // Get current month name in Turkish
@@ -231,7 +231,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     });
 
     setAnnualLeaveData(updatedData);
-  }, []);
+  }, [leaveWeeksData, summerLeaveWeeks]);
 
   // Handle person selection validation
   const isPersonAvailableForWeek = (personName: string, weekNumber: number): boolean => {

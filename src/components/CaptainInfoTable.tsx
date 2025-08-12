@@ -131,7 +131,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     }
   };
 
-  const handleCaptainFieldChange = (field: keyof Captain, value: any) => {
+  const handleCaptainFieldChange = (field: keyof Captain, value: string | string[] | Captain['durum']) => {
     if (selectedCaptain) {
       setSelectedCaptain({
         ...selectedCaptain,

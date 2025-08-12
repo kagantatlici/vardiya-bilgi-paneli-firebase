@@ -3,26 +3,14 @@ import { realCaptainsData } from '../data/captainsData';
 
 // Migration script to populate Firestore with existing data
 export async function migrateAllData() {
-  try {
-    console.log('🚀 Starting data migration...');
+  // 1. Migrate Captains Data
+  await migrateCaptains();
 
-    // 1. Migrate Captains Data
-    console.log('📋 Migrating captains data...');
-    await migrateCaptains();
+  // 2. Migrate Leave Data
+  await migrateLeaves();
 
-    // 2. Migrate Leave Data
-    console.log('🏖️ Migrating leave data...');
-    await migrateLeaves();
-
-    // 3. Migrate Shift Data
-    console.log('📅 Migrating shift data...');
-    await migrateShifts();
-
-    console.log('✅ Data migration completed successfully!');
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    throw error;
-  }
+  // 3. Migrate Shift Data
+  await migrateShifts();
 }
 
 async function migrateCaptains() {
@@ -40,8 +28,6 @@ async function migrateCaptains() {
   for (const captain of captainsWithOrder) {
     await CaptainService.addCaptain(captain);
   }
-  
-  console.log(`✅ Migrated ${captainsWithOrder.length} captains`);
 }
 
 async function migrateLeaves() {
@@ -64,8 +50,6 @@ async function migrateLeaves() {
   for (const leave of summerLeaves) {
     await LeaveService.addLeave(leave);
   }
-  
-  console.log(`✅ Migrated ${summerLeaves.length} leave entries`);
 }
 
 async function migrateShifts() {
@@ -108,7 +92,6 @@ async function migrateShifts() {
   });
 
   await ShiftService.bulkAddShifts(shifts);
-  console.log(`✅ Migrated ${shifts.length} shift entries`);
 }
 
 // Export for use in components
