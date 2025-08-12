@@ -3,9 +3,10 @@ import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
+import MigrationUtility from "./MigrationUtility";
 import { realCaptainsData } from "../data/captainsData";
 
-type View = "main" | "captains" | "protocol" | "bonus" | "leave";
+type View = "main" | "captains" | "protocol" | "bonus" | "leave" | "migration";
 
 interface ShiftData {
   [key: string]: number; // "YYYY-MM-DD": shiftNumber
@@ -404,6 +405,10 @@ const MainScreen: React.FC = () => {
     return <LeaveManagement onBack={goBack} />;
   }
 
+  if (currentView === "migration") {
+    return <MigrationUtility onBack={goBack} />;
+  }
+
   // Main menu view
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
@@ -544,6 +549,31 @@ const MainScreen: React.FC = () => {
           >
             <span style={{ fontSize: "18px" }}>📅</span>
             <span style={{ textAlign: "center", lineHeight: "1.2" }}>İzin Yönetimi</span>
+          </button>
+
+          <button
+            onClick={() => navigateTo("migration")}
+            style={{
+              backgroundColor: "#dc2626",
+              color: "white",
+              padding: "12px 8px",
+              borderRadius: "8px",
+              border: "none",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              minHeight: "80px",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#b91c1c"}
+            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#dc2626"}
+          >
+            <span style={{ fontSize: "18px" }}>🔄</span>
+            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Database Migration</span>
           </button>
 
           <button
