@@ -230,17 +230,33 @@ const MainScreen: React.FC = () => {
 
   // Function to get pilots on leave for a specific shift
   const getPilotsOnLeaveForShift = (shiftNumber: number): string[] => {
-    // This is a mock implementation since we don't have actual leave management data yet
-    // In the real implementation, this would check the leave management data
-    // For now, let's simulate some pilots being on leave for demonstration
-    
-    // Example mock data - in real implementation, this would come from LeaveManagement component
-    const mockLeaveData: { [key: number]: string[] } = {
-      38: ["Harun DOKUZ (BK)", "Uğraş ALPASLAN", "Kağan TATLICI"], // 3 pilots on leave for shift 38
-      39: [], // No pilots on leave for shift 39
+    // Real leave data from LeaveManagement - this matches summer leave schedule
+    const actualLeaveData: { [key: number]: string[] } = {
+      // 28 Temmuz - 02 Ağustos (35. Vardiya)
+      35: ["Selahattin KUT", "Uğraş AKYOL"],
+      // 03 - 08 Ağustos (36. Vardiya)  
+      36: ["Selim KANDEMİRLİ"],
+      // 09 - 14 Ağustos (37. Vardiya)
+      37: ["Uğraş AKYOL", "M.Kemal ONUR", "Selahattin KUT"],
+      // 15 - 20 Ağustos (38. Vardiya)
+      38: ["Uğraş AKYOL", "Kağan TATLICI", "Harun DOKUZ (BK)"],
+      // 21 - 26 Ağustos (39. Vardiya)
+      39: ["Turgut KAYA", "Berker İRİCİOĞLU", "Cihan BASA"],
+      // 27 Ağustos - 01 Eylül (40. Vardiya)
+      40: ["Serhat YALÇIN", "Aytaç BAHADIR", "Taylan GÜLER"],
+      // 02 - 07 Eylül (41. Vardiya)
+      41: ["Kıvanç ERGÖNÜL", "Selahattin KUT", "Aytaç BAHADIR"],
+      // 08 - 13 Eylül (42. Vardiya)
+      42: ["Kıvanç ERGÖNÜL"],
+      // 14 - 19 Eylül (43. Vardiya)
+      43: ["Kıvanç ERGÖNÜL", "Turgut KAYA"],
+      // 20 - 25 Eylül (44. Vardiya) - empty
+      44: [],
+      // 26 Eylül - 01 Ekim (45. Vardiya) - empty
+      45: [],
     };
     
-    return mockLeaveData[shiftNumber] || [];
+    return actualLeaveData[shiftNumber] || [];
   };
 
   // Function to calculate working and leave counts for a shift
