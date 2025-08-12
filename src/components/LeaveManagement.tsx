@@ -195,7 +195,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
 
   const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
-  // Initialize annual leave data
+  // Initialize annual leave data and transfer approved summer leaves
   useEffect(() => {
     const initialData: AnnualLeaveEntry[] = leaveWeeksData.map(week => ({
       weekNumber: week.weekNumber,
@@ -206,7 +206,31 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       person3: "",
       person4: ""
     }));
-    setAnnualLeaveData(initialData);
+
+    // Transfer approved summer leaves to annual leave data
+    const updatedData = initialData.map(annualWeek => {
+      const summerWeek = summerLeaveWeeks.find(sw => sw.weekNumber === annualWeek.weekNumber && sw.approved);
+      if (summerWeek) {
+        const peopleToTransfer = [
+          summerWeek.person1,
+          summerWeek.person2,
+          summerWeek.person3,
+          summerWeek.person4,
+          summerWeek.person5
+        ].filter(p => p !== "");
+
+        return {
+          ...annualWeek,
+          person1: peopleToTransfer[0] || "",
+          person2: peopleToTransfer[1] || "",
+          person3: peopleToTransfer[2] || "",
+          person4: peopleToTransfer[3] || ""
+        };
+      }
+      return annualWeek;
+    });
+
+    setAnnualLeaveData(updatedData);
   }, []);
 
   // Handle person selection validation
