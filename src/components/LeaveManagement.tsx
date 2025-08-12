@@ -165,12 +165,19 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     { weekNumber: 32, startDate: "10 Temmuz", endDate: "15 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
     { weekNumber: 33, startDate: "16 Temmuz", endDate: "21 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
     { weekNumber: 34, startDate: "22 Temmuz", endDate: "27 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 35, startDate: "28 Temmuz", endDate: "02 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 36, startDate: "03 Ağustos", endDate: "08 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 37, startDate: "09 Ağustos", endDate: "14 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 38, startDate: "15 Ağustos", endDate: "20 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 39, startDate: "21 Ağustos", endDate: "26 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 40, startDate: "27 Ağustos", endDate: "01 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+    // Ağustos 2025 izin planı
+    { weekNumber: 35, startDate: "28 Temmuz", endDate: "02 Ağustos", person1: "Selahattin KUT", person2: "Uğraş AKYOL", person3: "", person4: "", person5: "", approved: true },
+    { weekNumber: 36, startDate: "03 Ağustos", endDate: "08 Ağustos", person1: "Selim KANDEMİRLİ", person2: "", person3: "", person4: "", person5: "", approved: true },
+    { weekNumber: 37, startDate: "09 Ağustos", endDate: "14 Ağustos", person1: "Uğraş AKYOL", person2: "M.Kemal ONUR", person3: "Selahattin KUT", person4: "", person5: "", approved: true },
+    { weekNumber: 38, startDate: "15 Ağustos", endDate: "20 Ağustos", person1: "Uğraş AKYOL", person2: "Kağan TATLICI", person3: "Harun DOKUZ (BK)", person4: "", person5: "", approved: true },
+    { weekNumber: 39, startDate: "21 Ağustos", endDate: "26 Ağustos", person1: "Turgut KAYA", person2: "Berker İRİCİOĞLU", person3: "Cihan BASA", person4: "", person5: "", approved: true },
+    { weekNumber: 40, startDate: "27 Ağustos", endDate: "01 Eylül", person1: "Serhat YALÇIN", person2: "Aytaç BAHADIR", person3: "Taylan GÜLER", person4: "", person5: "", approved: true },
+    // Eylül 2025 izin planı
+    { weekNumber: 41, startDate: "02 Eylül", endDate: "07 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Selahattin KUT", person3: "Aytaç BAHADIR", person4: "", person5: "", approved: true },
+    { weekNumber: 42, startDate: "08 Eylül", endDate: "13 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "", person3: "", person4: "", person5: "", approved: true },
+    { weekNumber: 43, startDate: "14 Eylül", endDate: "19 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Turgut KAYA", person3: "", person4: "", person5: "", approved: true },
+    { weekNumber: 44, startDate: "20 Eylül", endDate: "25 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+    { weekNumber: 45, startDate: "26 Eylül", endDate: "01 Ekim", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
   ];
 
   const [selectedPerson, setSelectedPerson] = useState<string>("");
