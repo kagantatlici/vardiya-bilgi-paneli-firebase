@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
+import { LeaveService, CaptainService } from "../services/database";
+import type { Captain as FirestoreCaptain } from "../services/database";
 
-interface Captain {
-  id: number;
-  sicilNo: string;
-  isim: string;
-  aisMobNo: string;
-  aktifEhliyetler: string[];
-  durum: "Aktif" | "Pasif";
-}
+// Use Captain type from database service
+type Captain = FirestoreCaptain;
 
 interface LeaveWeek {
   weekNumber: number;
@@ -44,40 +40,37 @@ interface LeaveManagementProps {
 }
 
 const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
-  const { toasts, showSuccess, removeToast } = useToast();
+  const { toasts, showSuccess, showError, removeToast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number>(2025);
-  // Captain data from CaptainInfoTable
-  const realCaptainsData: Captain[] = [
-    { id: 1, sicilNo: "51793", isim: "Harun DOKUZ (BK)", aisMobNo: "972410883", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 2, sicilNo: "51043", isim: "Osman ORHAL (BKV)", aisMobNo: "972410768", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 3, sicilNo: "51739", isim: "Kıvanç ERGÖNÜL", aisMobNo: "972410763", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 4, sicilNo: "51806", isim: "Yavuz ENGİNER", aisMobNo: "972410780", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 5, sicilNo: "50886", isim: "Tamer AZGIN", aisMobNo: "972410778", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 6, sicilNo: "50974", isim: "Berker İRİCİOĞLU", aisMobNo: "972410776", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 7, sicilNo: "52216", isim: "Selim KANDEMİRLİ", aisMobNo: "972410769", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 8, sicilNo: "52820", isim: "Sami ASLAN", aisMobNo: "972410765", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 9, sicilNo: "52361", isim: "Cihan BASA", aisMobNo: "972410757", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 10, sicilNo: "52818", isim: "Ahmet DURAK", aisMobNo: "972410753", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 11, sicilNo: "52953", isim: "Turgut KAYA", aisMobNo: "972410779", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 12, sicilNo: "52806", isim: "Alphan TÜRKANIK", aisMobNo: "972410820", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 13, sicilNo: "52958", isim: "Selahattin KUT", aisMobNo: "972410700", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 14, sicilNo: "53675", isim: "Kağan TATLICI", aisMobNo: "972410786", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 15, sicilNo: "53196", isim: "Serhat YALÇIN", aisMobNo: "972410847", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 16, sicilNo: "52187", isim: "Uğraş AKYOL", aisMobNo: "972410741", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    { id: 17, sicilNo: "52942", isim: "Taylan GÜLER", aisMobNo: "972410864", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 18, sicilNo: "53677", isim: "Aytaç BAHADIR", aisMobNo: "", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 19, sicilNo: "53759", isim: "M.Kemal ONUR", aisMobNo: "972410689", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 20, sicilNo: "53752", isim: "Dilek ALTAY", aisMobNo: "972410706", aktifEhliyetler: ["İst"], durum: "Aktif" },
-    { id: 21, sicilNo: "53857", isim: "Gökmen ALTUNDOĞAN", aisMobNo: "972410903", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 22, sicilNo: "53891", isim: "Mustafa TÜRKOĞLU", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 23, sicilNo: "50978", isim: "Rahmi Alpaslan SOYUER", aisMobNo: "", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
-    // Empty slots for future pilots
-    { id: 24, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 25, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 26, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 27, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-    { id: 28, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
-  ];
+  const [captains, setCaptains] = useState<Captain[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [captainsData] = await Promise.all([
+        CaptainService.getAllCaptains(),
+        LeaveService.getLeavesByYear(selectedYear)
+      ]);
+      
+      setCaptains(captainsData);
+      
+      // TODO: Convert Firestore leave data to component state in future enhancement
+      
+    } catch (error) {
+      console.error('Error loading leave data:', error);
+      showError('İzin verileri yüklenirken hata oluştu!');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear, showError]);
+
+  // Load captains and leave data from Firestore
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Captain data loaded from Firestore
 
   // Leave weeks data from shift calendar - get data based on selected year
   const leaveWeeksData: LeaveWeek[] = useMemo(() => {
@@ -545,15 +538,143 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   };
 
   // Save functions
-  const handleSaveAnnualLeave = () => {
-    console.log("Annual leave data saved:", annualLeaveData);
-    showSuccess("📋 Yıllık izin verileri kaydedildi!");
+  const handleSaveAnnualLeave = async () => {
+    try {
+      // Convert annual leave data to Firestore format
+      const leaveEntries = annualLeaveData.map(week => {
+        const pilots = [week.person1, week.person2, week.person3, week.person4].filter(p => p !== '');
+        return {
+          weekNumber: week.weekNumber,
+          startDate: week.dateRange.split('-')[0].trim(),
+          endDate: week.dateRange.split('-')[1]?.trim() || week.dateRange,
+          year: selectedYear,
+          month: week.month,
+          pilots,
+          approved: true,
+          type: 'annual' as const
+        };
+      }).filter(entry => entry.pilots.length > 0); // Only save weeks with assigned pilots
+      
+      // Save each entry
+      await Promise.all(
+        leaveEntries.map(entry => LeaveService.addLeave(entry))
+      );
+      
+      showSuccess("📋 Yıllık izin verileri kaydedildi!");
+    } catch (error) {
+      console.error('Error saving annual leave data:', error);
+      showError('Yıllık izin verileri kaydedilirken hata oluştu!');
+    }
   };
 
-  const handleSaveSummerLeave = () => {
-    console.log("Summer leave data saved:", summerLeaveData);
-    showSuccess("🏖️ Yaz izni verileri kaydedildi!");
+  const handleSaveSummerLeave = async () => {
+    try {
+      // Convert summer leave data to Firestore format
+      const leaveEntries = summerLeaveData.map(week => {
+        const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5].filter(p => p !== '');
+        return {
+          weekNumber: week.weekNumber,
+          startDate: week.startDate,
+          endDate: week.endDate,
+          year: selectedYear,
+          month: getMonthFromDate(week.startDate),
+          pilots,
+          approved: week.approved,
+          type: 'summer' as const
+        };
+      }).filter(entry => entry.pilots.length > 0); // Only save weeks with assigned pilots
+      
+      // Save each entry
+      await Promise.all(
+        leaveEntries.map(entry => LeaveService.addLeave(entry))
+      );
+      
+      showSuccess("🏖️ Yaz izni verileri kaydedildi!");
+    } catch (error) {
+      console.error('Error saving summer leave data:', error);
+      showError('Yaz izni verileri kaydedilirken hata oluştu!');
+    }
   };
+  
+  // Helper function to extract month from date string
+  const getMonthFromDate = (dateStr: string): string => {
+    const monthNames = [
+      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    ];
+    const month = dateStr.split(' ')[1];
+    return monthNames.find(m => m === month) || 'Bilinmiyor';
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+        {/* Header */}
+        <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center", lineHeight: "1.3", flex: 1 }}>
+              İzin Yönetim Paneli
+            </h1>
+            {onBack && (
+              <button
+                onClick={onBack}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  color: "white",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  padding: "8px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ← Ana Sayfa
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Loading Content */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "60px 20px",
+          backgroundColor: "white",
+          margin: "20px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}>
+          <div style={{
+            fontSize: "16px",
+            color: "#6b7280",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}>
+            <div style={{
+              width: "20px",
+              height: "20px",
+              border: "2px solid #e5e7eb",
+              borderTop: "2px solid #1f2937",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }} />
+            İzin verileri yükleniyor...
+          </div>
+        </div>
+
+        <style>
+          {`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
@@ -674,7 +795,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               onBlur={(e) => e.target.style.borderColor = "#e5e7eb"}
             >
               <option value="">Lütfen seçiniz</option>
-              {realCaptainsData.filter(captain => captain.isim.trim() !== "").map(captain => (
+              {captains.filter(captain => captain.isim.trim() !== "").map(captain => (
                 <option key={captain.id} value={captain.isim}>
                   {captain.isim}
                 </option>
@@ -930,7 +1051,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                             }}
                           >
                             <option value="">*</option>
-                            {realCaptainsData.filter(captain => captain.isim.trim() !== "").map(captain => (
+                            {captains.filter(captain => captain.isim.trim() !== "").map(captain => (
                               <option
                                 key={captain.id}
                                 value={captain.isim}
@@ -1070,7 +1191,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                             disabled={week.approved}
                           >
                             <option value="">*</option>
-                            {realCaptainsData.filter(captain => captain.isim.trim() !== "").map(captain => (
+                            {captains.filter(captain => captain.isim.trim() !== "").map(captain => (
                               <option
                                 key={captain.id}
                                 value={captain.isim}
@@ -1115,7 +1236,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                         disabled={week.approved}
                       >
                         <option value="">*</option>
-                        {realCaptainsData.filter(captain => captain.isim.trim() !== "").map(captain => (
+                        {captains.filter(captain => captain.isim.trim() !== "").map(captain => (
                           <option
                             key={captain.id}
                             value={captain.isim}

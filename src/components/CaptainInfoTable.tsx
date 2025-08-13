@@ -1,34 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
-import { realCaptainsData } from "../data/captainsData";
+import { CaptainService } from "../services/database";
+import type { Captain as CaptainType } from "../services/database";
 
-interface Captain {
-  id: number;
-  sicilNo: string;
-  isim: string;
-  aisMobNo: string;
-  aktifEhliyetler: string[];
-  tumEhliyetler: {
-    istanbul: boolean;
-    canakkale: boolean;
-    hpasa: boolean;
-    kepez: boolean;
-    izmir: boolean;
-    mersin: boolean;
-    zonguldak: boolean;
-  };
-  melbusat: {
-    pantolon: string;
-    gomlek: string;
-    tshirt: string;
-    yelek: string;
-    polar: string;
-    mont: string;
-    ayakkabi: string;
-  };
-  durum: "Aktif" | "Pasif";
-}
+// Use the Captain type from database service
+type Captain = CaptainType;
 
 interface CaptainInfoTableProps {
   onBack?: () => void;
@@ -37,7 +14,8 @@ interface CaptainInfoTableProps {
 const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
   const { toasts, showSuccess, showError, removeToast } = useToast();
   
-  const [captains, setCaptains] = useState<Captain[]>(realCaptainsData);
+  const [captains, setCaptains] = useState<Captain[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragMode, setDragMode] = useState<boolean>(false);
   const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
@@ -45,6 +23,24 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
   const [selectedCaptain, setSelectedCaptain] = useState<Captain | null>(null);
   const longPressTimer = useRef<number | null>(null);
   const longPressStartTime = useRef<number>(0);
+
+  const loadCaptains = useCallback(async () => {
+    try {
+      setLoading(true);
+      const captainsData = await CaptainService.getAllCaptains();
+      setCaptains(captainsData);
+    } catch (error) {
+      console.error('Error loading captains:', error);
+      showError('Pilot bilgileri yüklenirken hata oluştu!');
+    } finally {
+      setLoading(false);
+    }
+  }, [showError]);
+
+  // Load captains from Firestore
+  useEffect(() => {
+    loadCaptains();
+  }, [loadCaptains]);
 
   // Long press handlers
   const handleTouchStart = (index: number) => {
@@ -78,9 +74,15 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     }
   };
 
-  const handleSave = () => {
-    setShowSaveModal(false);
-    showSuccess("Sıralama değişikliği kaydedildi!");
+  const handleSave = async () => {
+    try {
+      setShowSaveModal(false);
+      await CaptainService.updateCaptainOrder(captains);
+      showSuccess("Sıralama değişikliği kaydedildi!");
+    } catch (error) {
+      console.error('Error saving captain order:', error);
+      showError('Sıralama kaydedilirken hata oluştu!');
+    }
   };
 
   const handleCancel = () => {
@@ -97,37 +99,70 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     setSelectedCaptain(null);
   };
 
-  const handleDetailSave = () => {
+  const handleDetailSave = async () => {
     if (selectedCaptain) {
-      setCaptains(prev => prev.map(captain => 
-        captain.id === selectedCaptain.id ? selectedCaptain : captain
-      ));
+      try {
+        await CaptainService.updateCaptain(selectedCaptain.id, {
+          sicilNo: selectedCaptain.sicilNo,
+          isim: selectedCaptain.isim,
+          aisMobNo: selectedCaptain.aisMobNo,
+          aktifEhliyetler: selectedCaptain.aktifEhliyetler,
+          tumEhliyetler: selectedCaptain.tumEhliyetler,
+          melbusat: selectedCaptain.melbusat,
+          durum: selectedCaptain.durum
+        });
+        
+        // Update local state
+        setCaptains(prev => prev.map(captain => 
+          captain.id === selectedCaptain.id ? selectedCaptain : captain
+        ));
+        
+        showSuccess("Pilot bilgileri kaydedildi!");
+      } catch (error) {
+        console.error('Error saving captain details:', error);
+        showError('Pilot bilgileri kaydedilirken hata oluştu!');
+      }
     }
     setShowDetailModal(false);
     setSelectedCaptain(null);
-    showSuccess("Pilot bilgileri kaydedildi!");
   };
 
-  const handleDeleteCaptain = () => {
+  const handleDeleteCaptain = async () => {
     if (selectedCaptain && window.confirm(`${selectedCaptain.isim || 'Bu pilot'} silinsin mi?`)) {
-      const emptyCaptain: Captain = {
-        ...selectedCaptain,
-        sicilNo: "",
-        isim: "",
-        aisMobNo: "",
-        aktifEhliyetler: [],
-        durum: "Pasif",
-        tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
-        melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" }
-      };
+      try {
+        const emptyCaptain: Captain = {
+          ...selectedCaptain,
+          sicilNo: "",
+          isim: "",
+          aisMobNo: "",
+          aktifEhliyetler: [],
+          durum: "Pasif",
+          tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
+          melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" }
+        };
 
-      setCaptains(prev => prev.map(captain => 
-        captain.id === selectedCaptain.id ? emptyCaptain : captain
-      ));
+        await CaptainService.updateCaptain(selectedCaptain.id, {
+          sicilNo: "",
+          isim: "",
+          aisMobNo: "",
+          aktifEhliyetler: [],
+          durum: "Pasif",
+          tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
+          melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" }
+        });
+
+        setCaptains(prev => prev.map(captain => 
+          captain.id === selectedCaptain.id ? emptyCaptain : captain
+        ));
+        
+        showError("Pilot silindi!");
+      } catch (error) {
+        console.error('Error deleting captain:', error);
+        showError('Pilot silinirken hata oluştu!');
+      }
       
       setShowDetailModal(false);
       setSelectedCaptain(null);
-      showError("Pilot silindi!");
     }
   };
 
@@ -181,6 +216,14 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
       {/* Header */}
       <header style={{ backgroundColor: "#7e22ce", color: "white", padding: "16px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "8px" }}>
@@ -230,14 +273,47 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
         </div>
       )}
 
-      {/* Table Container */}
-      <div style={{ padding: "8px", overflowX: "auto" }}>
+      {/* Loading Indicator */}
+      {loading && (
         <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "40px",
           backgroundColor: "white",
+          margin: "8px",
           borderRadius: "8px",
           boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          overflow: "hidden",
         }}>
+          <div style={{
+            fontSize: "14px",
+            color: "#6b7280",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}>
+            <div style={{
+              width: "16px",
+              height: "16px",
+              border: "2px solid #e5e7eb",
+              borderTop: "2px solid #7e22ce",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }} />
+            Pilot bilgileri yükleniyor...
+          </div>
+        </div>
+      )}
+
+      {/* Table Container */}
+      {!loading && (
+        <div style={{ padding: "8px", overflowX: "auto" }}>
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            overflow: "hidden",
+          }}>
           {/* Table Header */}
           <div style={{
             display: "grid",
@@ -383,7 +459,8 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           <div>• Satıra 1.5 saniye basılı tutarak sıralama değiştirebilirsiniz</div>
           <div>• Detay butonuna tıklayarak pilot bilgilerini görüntüleyebilirsiniz</div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Save Modal */}
       {showSaveModal && (
