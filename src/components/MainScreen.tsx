@@ -1,10 +1,12 @@
-import React, { useState, useMemo, useCallback, startTransition } from "react";
+import React, { useState, useMemo, useCallback, startTransition, useEffect } from "react";
 import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
 import { useAutoMigration } from "../hooks/useAutoMigration";
 import { realCaptainsData } from "../data/captainsData";
+import { ShiftService } from "../services/database";
+import type { ShiftData as FirestoreShiftData } from "../services/database";
 
 type View = "main" | "captains" | "protocol" | "bonus" | "leave";
 
@@ -26,6 +28,8 @@ const MainScreen: React.FC = () => {
   const [today] = useState<Date>(new Date());
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
+  const [firestoreShifts, setFirestoreShifts] = useState<FirestoreShiftData[]>([]);
+  const [shiftsLoaded, setShiftsLoaded] = useState<boolean>(false);
 
   const openExternalLink = useCallback((url: string) => {
     window.open(url, "_blank");
@@ -43,91 +47,62 @@ const MainScreen: React.FC = () => {
     });
   }, []);
 
-  // Real shift data (full version from ShiftCalendar)
+  // Load shifts from Firestore
+  useEffect(() => {
+    const loadShifts = async () => {
+      try {
+        const shifts = await ShiftService.getAllShifts();
+        setFirestoreShifts(shifts);
+        setShiftsLoaded(true);
+      } catch (error) {
+        console.error("❌ Shifts yükleme hatası:", error);
+        setShiftsLoaded(true); // Still set to true to show fallback
+      }
+    };
+
+    if (isInitialized) {
+      loadShifts();
+    }
+  }, [isInitialized]);
+
+  // Create shift data from Firestore or fallback to hardcoded
   const createShiftData = (): ShiftData => {
     const shifts: ShiftData = {};
     
-    // 2025 shifts
-    const shifts2025 = [
-      [1, [5,6,7], 1], [2, [11,12,13], 1], [3, [17,18,19], 1], [4, [23,24,25], 1], [5, [29,30,31], 1],
-      [6, [4,5,6], 2], [7, [10,11,12], 2], [8, [16,17,18], 2], [9, [22,23,24], 2], [10, [28,1,2], [2,3]],
-      [11, [6,7,8], 3], [12, [12,13,14], 3], [13, [18,19,20], 3], [14, [24,25,26], 3], [15, [30,31,1], [3,4]],
-      [16, [5,6,7], 4], [17, [11,12,13], 4], [18, [17,18,19], 4], [19, [23,24,25], 4], [20, [29,30,1], [4,5]],
-      [21, [5,6,7], 5], [22, [11,12,13], 5], [23, [17,18,19], 5], [24, [23,24,25], 5], [25, [29,30,31], 5],
-      [26, [4,5,6], 6], [27, [10,11,12], 6], [28, [16,17,18], 6], [29, [22,23,24], 6], [30, [28,29,30], 6],
-      [31, [4,5,6], 7], [32, [10,11,12], 7], [33, [16,17,18], 7], [34, [22,23,24], 7], [35, [28,29,30], 7],
-      [36, [3,4,5], 8], [37, [9,10,11], 8], [38, [15,16,17], 8], [39, [21,22,23], 8], [40, [27,28,29], 8],
-      [41, [2,3,4], 9], [42, [8,9,10], 9], [43, [14,15,16], 9], [44, [20,21,22], 9], [45, [26,27,28], 9],
-      [46, [2,3,4], 10], [47, [8,9,10], 10], [48, [14,15,16], 10], [49, [20,21,22], 10], [50, [26,27,28], 10],
-      [51, [1,2,3], 11], [52, [7,8,9], 11], [53, [13,14,15], 11], [54, [19,20,21], 11], [55, [25,26,27], 11],
-      [56, [1,2,3], 12], [57, [7,8,9], 12], [58, [13,14,15], 12], [59, [19,20,21], 12], [60, [25,26,27], 12],
-      [61, [31,1,2], [12,1]]
-    ];
-
-    // 2026 shifts
-    const shifts2026 = [
-      [1, [6,7,8], 1], [2, [12,13,14], 1], [3, [18,19,20], 1], [4, [24,25,26], 1], [5, [30,31,1], [1,2]],
-      [6, [5,6,7], 2], [7, [11,12,13], 2], [8, [17,18,19], 2], [9, [23,24,25], 2], [10, [1,2,3], 3],
-      [11, [7,8,9], 3], [12, [13,14,15], 3], [13, [19,20,21], 3], [14, [25,26,27], 3], [15, [31,1,2], [3,4]],
-      [16, [6,7,8], 4], [17, [12,13,14], 4], [18, [18,19,20], 4], [19, [24,25,26], 4], [20, [30,1,2], [4,5]],
-      [21, [6,7,8], 5], [22, [12,13,14], 5], [23, [18,19,20], 5], [24, [24,25,26], 5], [25, [30,31,1], [5,6]],
-      [26, [5,6,7], 6], [27, [11,12,13], 6], [28, [17,18,19], 6], [29, [23,24,25], 6], [30, [29,30,1], [6,7]],
-      [31, [5,6,7], 7], [32, [11,12,13], 7], [33, [17,18,19], 7], [34, [23,24,25], 7], [35, [29,30,31], 7],
-      [36, [4,5,6], 8], [37, [10,11,12], 8], [38, [16,17,18], 8], [39, [22,23,24], 8], [40, [28,29,30], 8],
-      [41, [3,4,5], 9], [42, [9,10,11], 9], [43, [15,16,17], 9], [44, [21,22,23], 9], [45, [27,28,29], 9],
-      [46, [3,4,5], 10], [47, [9,10,11], 10], [48, [15,16,17], 10], [49, [21,22,23], 10], [50, [27,28,29], 10],
-      [51, [2,3,4], 11], [52, [8,9,10], 11], [53, [14,15,16], 11], [54, [20,21,22], 11], [55, [26,27,28], 11],
-      [56, [2,3,4], 12], [57, [8,9,10], 12], [58, [14,15,16], 12], [59, [20,21,22], 12], [60, [26,27,28], 12]
-    ];
-
-    // Helper to add shift dates
-    const addShiftDates = (
-      shiftNumber: number,
-      days: number[],
-      months: number | number[],
-      year: number
-    ) => {
-      days.forEach((day, index) => {
-        let targetYear = year;
-        const month = Array.isArray(months) ? months[index] - 1 : months - 1;
+    if (shiftsLoaded && firestoreShifts.length > 0) {
+      // Use Firestore data - convert continuous numbering to yearly display
+      firestoreShifts.forEach(shift => {
+        // Convert continuous shift numbers to yearly display numbers
+        let displayShiftNumber = shift.shiftNumber;
         
-        // Handle year transition (e.g., December 31 -> January 1)
-        if (month < 0) {
-          targetYear = year + 1;
-        }
-        if (month > 11) {
-          targetYear = year - 1;
+        if (shift.year === 2025) {
+          // 2025: shifts 1-61 display as 1-61
+          displayShiftNumber = shift.shiftNumber;
+        } else if (shift.year === 2026) {
+          // 2026: shifts 61-122 display as 61,1-61 (61. vardiya 2026'da da 61 olarak gösterilsin)
+          displayShiftNumber = shift.shiftNumber <= 61 ? shift.shiftNumber : shift.shiftNumber - 61;
+        } else if (shift.year === 2027) {
+          // 2027: shifts 122-183 display as 61,1-61
+          displayShiftNumber = shift.shiftNumber <= 122 ? shift.shiftNumber - 61 : shift.shiftNumber - 122;
         }
         
-        const adjustedMonth = month < 0 ? 11 : month > 11 ? 0 : month;
-        
-        // Validate date before creating
-        if (day >= 1 && day <= 31 && adjustedMonth >= 0 && adjustedMonth <= 11) {
-          const date = new Date(targetYear, adjustedMonth, day);
-          
-          // Double check the date is valid
-          if (date.getFullYear() === targetYear && date.getMonth() === adjustedMonth && date.getDate() === day) {
-            const dateKey = date.toISOString().split("T")[0];
-            shifts[dateKey] = shiftNumber;
-          }
-        }
+        shifts[shift.date] = displayShiftNumber;
       });
-    };
-
-    // Process 2025 shifts
-    shifts2025.forEach(([shiftNum, days, months]) => {
-      addShiftDates(shiftNum as number, days as number[], months as number | number[], 2025);
-    });
-
-    // Process 2026 shifts
-    shifts2026.forEach(([shiftNum, days, months]) => {
-      addShiftDates(shiftNum as number, days as number[], months as number | number[], 2026);
-    });
-
+    } else {
+      // Fallback to hardcoded data (only for emergency)
+      const fallbackShifts = [
+        {shift: 61, date: "2025-12-31"}, {shift: 61, date: "2026-01-01"}, {shift: 61, date: "2026-01-02"},
+        {shift: 1, date: "2026-01-06"}, {shift: 1, date: "2026-01-07"}, {shift: 1, date: "2026-01-08"},
+      ];
+      fallbackShifts.forEach(({shift, date}) => {
+        shifts[date] = shift;
+      });
+    }
+    
     return shifts;
   };
 
-  const shiftData = createShiftData();
+  const shiftData = useMemo(() => createShiftData(), [shiftsLoaded, firestoreShifts]);
 
   // Shift schedule for 2025 (from shift_calendar_2025_2027.txt)
   const shiftSchedule2025: ShiftInfo[] = [
@@ -277,9 +252,13 @@ const MainScreen: React.FC = () => {
     };
   };
 
-  // Get shift number for a date
+  // Get shift number for a date (timezone-safe)
   const getShiftNumber = (date: Date): number | null => {
-    const dateKey = date.toISOString().split("T")[0];
+    // Timezone-safe date formatting
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
     return shiftData[dateKey] || null;
   };
 
@@ -330,19 +309,82 @@ const MainScreen: React.FC = () => {
   const renderCalendarGrid = () => {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
     const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
-    const days: (number | null)[] = [];
+    const days: Array<{day: number | null, isFromOtherMonth?: boolean, otherMonthType?: 'prev' | 'next', realDate?: Date}> = [];
 
-    // Add empty cells for days before first day of month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
+    // Calculate adjacent months
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+
+    // Add previous month days for empty cells at beginning
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      const realDate = new Date(prevYear, prevMonth, day);
+      const shiftNumber = getShiftNumber(realDate);
+      
+      // Only add if it has a shift and continues into current month
+      if (shiftNumber) {
+        const nextDayDate = new Date(currentYear, currentMonth, 1);
+        const nextDayShift = getShiftNumber(nextDayDate);
+        if (shiftNumber === nextDayShift) {
+          days.push({
+            day,
+            isFromOtherMonth: true,
+            otherMonthType: 'prev',
+            realDate
+          });
+          continue;
+        }
+      }
+      
+      // Add empty cell if no continuing shift
+      days.push({day: null});
     }
 
-    // Add days of the month
+    // Add current month days
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
+      const realDate = new Date(currentYear, currentMonth, day);
+      days.push({
+        day,
+        realDate
+      });
     }
 
-    return days.map((day, index) => {
+    // Calculate how many cells we need to fill the grid (6 rows × 7 days = 42)
+    const totalUsedCells = days.length;
+    const cellsToFill = 42 - totalUsedCells;
+
+    // Add next month days for empty cells at end
+    for (let day = 1; day <= cellsToFill; day++) {
+      if (day <= 3) { // Only check first 3 days of next month
+        const realDate = new Date(nextYear, nextMonth, day);
+        const shiftNumber = getShiftNumber(realDate);
+        
+        // Only add if it has a shift and continues from current month
+        if (shiftNumber) {
+          const lastDayDate = new Date(currentYear, currentMonth, daysInMonth);
+          const lastDayShift = getShiftNumber(lastDayDate);
+          if (shiftNumber === lastDayShift) {
+            days.push({
+              day,
+              isFromOtherMonth: true,
+              otherMonthType: 'next',
+              realDate
+            });
+            continue;
+          }
+        }
+      }
+      
+      // Add empty cell
+      days.push({day: null});
+    }
+
+    return days.map((dayInfo, index) => {
+      const { day, isFromOtherMonth, otherMonthType, realDate } = dayInfo;
+      
       if (day === null) {
         return (
           <div
@@ -356,9 +398,8 @@ const MainScreen: React.FC = () => {
         );
       }
 
-      const date = new Date(currentYear, currentMonth, day);
-      const shiftNumber = getShiftNumber(date);
-      const todayFlag = isToday(date);
+      const shiftNumber = realDate ? getShiftNumber(realDate) : null;
+      const todayFlag = realDate ? isToday(realDate) : false;
 
       return (
         <div
@@ -366,19 +407,33 @@ const MainScreen: React.FC = () => {
           style={{
             height: "60px",
             padding: "4px",
-            border: todayFlag ? "2px solid #facc15" : "1px solid #e5e7eb",
-            backgroundColor: shiftNumber ? "#dbeafe" : "#ffffff",
+            border: todayFlag ? "2px solid #facc15" : 
+                    isFromOtherMonth ? "2px dashed #94a3b8" : "1px solid #e5e7eb",
+            backgroundColor: shiftNumber 
+              ? (isFromOtherMonth ? "#e2e8f0" : "#dbeafe") 
+              : (isFromOtherMonth ? "#f1f5f9" : "#ffffff"),
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             fontSize: "10px",
           }}
         >
-          <div style={{ fontWeight: "600", color: "#374151", fontSize: "12px" }}>{day}</div>
+          <div style={{ 
+            fontWeight: isFromOtherMonth ? "500" : "600", 
+            color: isFromOtherMonth ? "#64748b" : "#374151", 
+            fontSize: "12px" 
+          }}>
+            {day}
+            {isFromOtherMonth && (
+              <span style={{fontSize: "9px", marginLeft: "2px", color: "#94a3b8"}}>
+                {otherMonthType === 'next' ? "→" : "←"}
+              </span>
+            )}
+          </div>
           {shiftNumber && (
             <div
               style={{
-                color: "#2563eb",
+                color: isFromOtherMonth ? "#64748b" : "#2563eb",
                 fontWeight: "500",
                 textAlign: "center",
                 fontSize: "8px",
@@ -454,7 +509,7 @@ const MainScreen: React.FC = () => {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
       {/* Header */}
-      <header style={{ backgroundColor: "#1e40af", color: "white", padding: "16px" }}>
+      <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}>
         <h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center", lineHeight: "1.3" }}>
           İstanbul Boğazı 3. Posta Bilgilendirme Ekranı
         </h1>
@@ -471,7 +526,7 @@ const MainScreen: React.FC = () => {
           }
           style={{
             width: "100%",
-            backgroundColor: "#1e40af",
+            backgroundColor: "#059669",
             color: "white",
             padding: "16px 20px",
             borderRadius: "12px",
@@ -485,26 +540,27 @@ const MainScreen: React.FC = () => {
             fontWeight: "600",
             cursor: "pointer",
             marginBottom: "20px",
-            boxShadow: "0 4px 12px rgba(30, 64, 175, 0.3)",
+            boxShadow: "0 4px 12px rgba(5, 150, 105, 0.3)",
             transform: "scale(1)",
             transition: "all 0.2s ease"
           }}
           onMouseOver={(e) => {
             const target = e.target as HTMLElement;
-            target.style.backgroundColor = "#1d4ed8";
+            target.style.backgroundColor = "#047857";
             target.style.transform = "scale(1.02)";
-            target.style.boxShadow = "0 6px 16px rgba(30, 64, 175, 0.4)";
+            target.style.boxShadow = "0 6px 16px rgba(5, 150, 105, 0.4)";
           }}
           onMouseOut={(e) => {
             const target = e.target as HTMLElement;
-            target.style.backgroundColor = "#1e40af";
+            target.style.backgroundColor = "#059669";
             target.style.transform = "scale(1)";
-            target.style.boxShadow = "0 4px 12px rgba(30, 64, 175, 0.3)";
+            target.style.boxShadow = "0 4px 12px rgba(5, 150, 105, 0.3)";
           }}
         >
           <span style={{ fontSize: "24px" }}>🚢</span>
           <span>📊 ANLIK GEMİ SAYILARI</span>
         </button>
+
 
         {/* Dynamic Shift Information */}
         {(() => {
@@ -665,8 +721,8 @@ const MainScreen: React.FC = () => {
               cursor: "pointer",
             }}
           >
-            <span style={{ fontSize: "18px" }}>⚙️</span>
-            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Vardiya Takvimi Oluştur</span>
+            <span style={{ fontSize: "18px" }}>📊</span>
+            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Yıllık Vardiya Takvimi Oluşturma</span>
           </button>
         </div>
 

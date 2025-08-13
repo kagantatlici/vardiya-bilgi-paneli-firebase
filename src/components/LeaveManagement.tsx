@@ -45,6 +45,7 @@ interface LeaveManagementProps {
 
 const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   const { toasts, showSuccess, removeToast } = useToast();
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
   // Captain data from CaptainInfoTable
   const realCaptainsData: Captain[] = [
     { id: 1, sicilNo: "51793", isim: "Harun DOKUZ (BK)", aisMobNo: "972410883", aktifEhliyetler: ["İst", "Çkl"], durum: "Aktif" },
@@ -78,107 +79,315 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     { id: 28, sicilNo: "", isim: "", aisMobNo: "", aktifEhliyetler: [], durum: "Pasif" },
   ];
 
-  // Leave weeks data from shift calendar
-  const leaveWeeksData: LeaveWeek[] = useMemo(() => [
-    // Ocak
-    { weekNumber: 1, dateRange: "5-10 Ocak", month: "Ocak" },
-    { weekNumber: 2, dateRange: "11-16 Ocak", month: "Ocak" },
-    { weekNumber: 3, dateRange: "17-22 Ocak", month: "Ocak" },
-    { weekNumber: 4, dateRange: "23-28 Ocak", month: "Ocak" },
-    // Şubat
-    { weekNumber: 5, dateRange: "29 Ocak - 3 Şubat", month: "Şubat" },
-    { weekNumber: 6, dateRange: "4-9 Şubat", month: "Şubat" },
-    { weekNumber: 7, dateRange: "10-15 Şubat", month: "Şubat" },
-    { weekNumber: 8, dateRange: "16-21 Şubat", month: "Şubat" },
-    { weekNumber: 9, dateRange: "22-27 Şubat", month: "Şubat" },
-    // Mart
-    { weekNumber: 10, dateRange: "28 Şubat - 5 Mart", month: "Mart" },
-    { weekNumber: 11, dateRange: "6-11 Mart", month: "Mart" },
-    { weekNumber: 12, dateRange: "12-17 Mart", month: "Mart" },
-    { weekNumber: 13, dateRange: "18-23 Mart", month: "Mart" },
-    { weekNumber: 14, dateRange: "24-29 Mart", month: "Mart" },
-    // Nisan
-    { weekNumber: 15, dateRange: "30 Mart - 4 Nisan", month: "Nisan" },
-    { weekNumber: 16, dateRange: "5-10 Nisan", month: "Nisan" },
-    { weekNumber: 17, dateRange: "11-16 Nisan", month: "Nisan" },
-    { weekNumber: 18, dateRange: "17-22 Nisan", month: "Nisan" },
-    { weekNumber: 19, dateRange: "23-28 Nisan", month: "Nisan" },
-    // Mayıs
-    { weekNumber: 20, dateRange: "29 Nisan - 4 Mayıs", month: "Mayıs" },
-    { weekNumber: 21, dateRange: "5-10 Mayıs", month: "Mayıs" },
-    { weekNumber: 22, dateRange: "11-16 Mayıs", month: "Mayıs" },
-    { weekNumber: 23, dateRange: "17-22 Mayıs", month: "Mayıs" },
-    { weekNumber: 24, dateRange: "23-28 Mayıs", month: "Mayıs" },
-    // Haziran - Summer period starts
-    { weekNumber: 25, dateRange: "29 Mayıs - 3 Haziran", month: "Haziran" },
-    { weekNumber: 26, dateRange: "4-9 Haziran", month: "Haziran" },
-    { weekNumber: 27, dateRange: "10-15 Haziran", month: "Haziran" },
-    { weekNumber: 28, dateRange: "16-21 Haziran", month: "Haziran" },
-    { weekNumber: 29, dateRange: "22-27 Haziran", month: "Haziran" },
-    // Temmuz
-    { weekNumber: 30, dateRange: "28 Haziran - 3 Temmuz", month: "Temmuz" },
-    { weekNumber: 31, dateRange: "4-9 Temmuz", month: "Temmuz" },
-    { weekNumber: 32, dateRange: "10-15 Temmuz", month: "Temmuz" },
-    { weekNumber: 33, dateRange: "16-21 Temmuz", month: "Temmuz" },
-    { weekNumber: 34, dateRange: "22-27 Temmuz", month: "Temmuz" },
-    // Ağustos
-    { weekNumber: 35, dateRange: "28 Temmuz - 2 Ağustos", month: "Ağustos" },
-    { weekNumber: 36, dateRange: "3-8 Ağustos", month: "Ağustos" },
-    { weekNumber: 37, dateRange: "9-14 Ağustos", month: "Ağustos" },
-    { weekNumber: 38, dateRange: "15-20 Ağustos", month: "Ağustos" },
-    { weekNumber: 39, dateRange: "21-26 Ağustos", month: "Ağustos" },
-    // Eylül - Summer period ends
-    { weekNumber: 40, dateRange: "27 Ağustos - 1 Eylül", month: "Eylül" },
-    { weekNumber: 41, dateRange: "2-7 Eylül", month: "Eylül" },
-    { weekNumber: 42, dateRange: "8-13 Eylül", month: "Eylül" },
-    { weekNumber: 43, dateRange: "14-19 Eylül", month: "Eylül" },
-    { weekNumber: 44, dateRange: "20-25 Eylül", month: "Eylül" },
-    // Ekim
-    { weekNumber: 45, dateRange: "26 Eylül - 1 Ekim", month: "Ekim" },
-    { weekNumber: 46, dateRange: "2-7 Ekim", month: "Ekim" },
-    { weekNumber: 47, dateRange: "8-13 Ekim", month: "Ekim" },
-    { weekNumber: 48, dateRange: "14-19 Ekim", month: "Ekim" },
-    { weekNumber: 49, dateRange: "20-25 Ekim", month: "Ekim" },
-    { weekNumber: 50, dateRange: "26-31 Ekim", month: "Ekim" },
-    // Kasım
-    { weekNumber: 51, dateRange: "1-6 Kasım", month: "Kasım" },
-    { weekNumber: 52, dateRange: "7-12 Kasım", month: "Kasım" },
-    { weekNumber: 53, dateRange: "13-18 Kasım", month: "Kasım" },
-    { weekNumber: 54, dateRange: "19-24 Kasım", month: "Kasım" },
-    { weekNumber: 55, dateRange: "25-30 Kasım", month: "Kasım" },
-    // Aralık
-    { weekNumber: 56, dateRange: "1-6 Aralık", month: "Aralık" },
-    { weekNumber: 57, dateRange: "7-12 Aralık", month: "Aralık" },
-    { weekNumber: 58, dateRange: "13-18 Aralık", month: "Aralık" },
-    { weekNumber: 59, dateRange: "19-24 Aralık", month: "Aralık" },
-    { weekNumber: 60, dateRange: "25-30 Aralık", month: "Aralık" },
-  ], []);
+  // Leave weeks data from shift calendar - get data based on selected year
+  const leaveWeeksData: LeaveWeek[] = useMemo(() => {
+    if (selectedYear === 2025) {
+      return [
+        // Ocak
+        { weekNumber: 1, dateRange: "5-10 Ocak", month: "Ocak" },
+        { weekNumber: 2, dateRange: "11-16 Ocak", month: "Ocak" },
+        { weekNumber: 3, dateRange: "17-22 Ocak", month: "Ocak" },
+        { weekNumber: 4, dateRange: "23-28 Ocak", month: "Ocak" },
+        // Şubat
+        { weekNumber: 5, dateRange: "29 Ocak - 3 Şubat", month: "Şubat" },
+        { weekNumber: 6, dateRange: "4-9 Şubat", month: "Şubat" },
+        { weekNumber: 7, dateRange: "10-15 Şubat", month: "Şubat" },
+        { weekNumber: 8, dateRange: "16-21 Şubat", month: "Şubat" },
+        { weekNumber: 9, dateRange: "22-27 Şubat", month: "Şubat" },
+        // Mart
+        { weekNumber: 10, dateRange: "28 Şubat - 5 Mart", month: "Mart" },
+        { weekNumber: 11, dateRange: "6-11 Mart", month: "Mart" },
+        { weekNumber: 12, dateRange: "12-17 Mart", month: "Mart" },
+        { weekNumber: 13, dateRange: "18-23 Mart", month: "Mart" },
+        { weekNumber: 14, dateRange: "24-29 Mart", month: "Mart" },
+        // Nisan
+        { weekNumber: 15, dateRange: "30 Mart - 4 Nisan", month: "Nisan" },
+        { weekNumber: 16, dateRange: "5-10 Nisan", month: "Nisan" },
+        { weekNumber: 17, dateRange: "11-16 Nisan", month: "Nisan" },
+        { weekNumber: 18, dateRange: "17-22 Nisan", month: "Nisan" },
+        { weekNumber: 19, dateRange: "23-28 Nisan", month: "Nisan" },
+        // Mayıs
+        { weekNumber: 20, dateRange: "29 Nisan - 4 Mayıs", month: "Mayıs" },
+        { weekNumber: 21, dateRange: "5-10 Mayıs", month: "Mayıs" },
+        { weekNumber: 22, dateRange: "11-16 Mayıs", month: "Mayıs" },
+        { weekNumber: 23, dateRange: "17-22 Mayıs", month: "Mayıs" },
+        { weekNumber: 24, dateRange: "23-28 Mayıs", month: "Mayıs" },
+        // Haziran - Summer period starts
+        { weekNumber: 25, dateRange: "29 Mayıs - 3 Haziran", month: "Haziran" },
+        { weekNumber: 26, dateRange: "4-9 Haziran", month: "Haziran" },
+        { weekNumber: 27, dateRange: "10-15 Haziran", month: "Haziran" },
+        { weekNumber: 28, dateRange: "16-21 Haziran", month: "Haziran" },
+        { weekNumber: 29, dateRange: "22-27 Haziran", month: "Haziran" },
+        // Temmuz
+        { weekNumber: 30, dateRange: "28 Haziran - 3 Temmuz", month: "Temmuz" },
+        { weekNumber: 31, dateRange: "4-9 Temmuz", month: "Temmuz" },
+        { weekNumber: 32, dateRange: "10-15 Temmuz", month: "Temmuz" },
+        { weekNumber: 33, dateRange: "16-21 Temmuz", month: "Temmuz" },
+        { weekNumber: 34, dateRange: "22-27 Temmuz", month: "Temmuz" },
+        // Ağustos
+        { weekNumber: 35, dateRange: "28 Temmuz - 2 Ağustos", month: "Ağustos" },
+        { weekNumber: 36, dateRange: "3-8 Ağustos", month: "Ağustos" },
+        { weekNumber: 37, dateRange: "9-14 Ağustos", month: "Ağustos" },
+        { weekNumber: 38, dateRange: "15-20 Ağustos", month: "Ağustos" },
+        { weekNumber: 39, dateRange: "21-26 Ağustos", month: "Ağustos" },
+        // Eylül - Summer period ends
+        { weekNumber: 40, dateRange: "27 Ağustos - 1 Eylül", month: "Eylül" },
+        { weekNumber: 41, dateRange: "2-7 Eylül", month: "Eylül" },
+        { weekNumber: 42, dateRange: "8-13 Eylül", month: "Eylül" },
+        { weekNumber: 43, dateRange: "14-19 Eylül", month: "Eylül" },
+        { weekNumber: 44, dateRange: "20-25 Eylül", month: "Eylül" },
+        // Ekim
+        { weekNumber: 45, dateRange: "26 Eylül - 1 Ekim", month: "Ekim" },
+        { weekNumber: 46, dateRange: "2-7 Ekim", month: "Ekim" },
+        { weekNumber: 47, dateRange: "8-13 Ekim", month: "Ekim" },
+        { weekNumber: 48, dateRange: "14-19 Ekim", month: "Ekim" },
+        { weekNumber: 49, dateRange: "20-25 Ekim", month: "Ekim" },
+        { weekNumber: 50, dateRange: "26-31 Ekim", month: "Ekim" },
+        // Kasım
+        { weekNumber: 51, dateRange: "1-6 Kasım", month: "Kasım" },
+        { weekNumber: 52, dateRange: "7-12 Kasım", month: "Kasım" },
+        { weekNumber: 53, dateRange: "13-18 Kasım", month: "Kasım" },
+        { weekNumber: 54, dateRange: "19-24 Kasım", month: "Kasım" },
+        { weekNumber: 55, dateRange: "25-30 Kasım", month: "Kasım" },
+        // Aralık
+        { weekNumber: 56, dateRange: "1-6 Aralık", month: "Aralık" },
+        { weekNumber: 57, dateRange: "7-12 Aralık", month: "Aralık" },
+        { weekNumber: 58, dateRange: "13-18 Aralık", month: "Aralık" },
+        { weekNumber: 59, dateRange: "19-24 Aralık", month: "Aralık" },
+        { weekNumber: 60, dateRange: "25-30 Aralık", month: "Aralık" },
+        { weekNumber: 61, dateRange: "31 Aralık - 5 Ocak", month: "Aralık" },
+      ];
+    } else if (selectedYear === 2026) {
+      return [
+        // Ocak
+        { weekNumber: 1, dateRange: "6-11 Ocak", month: "Ocak" },
+        { weekNumber: 2, dateRange: "12-17 Ocak", month: "Ocak" },
+        { weekNumber: 3, dateRange: "18-23 Ocak", month: "Ocak" },
+        { weekNumber: 4, dateRange: "24-29 Ocak", month: "Ocak" },
+        // Şubat
+        { weekNumber: 5, dateRange: "30 Ocak - 4 Şubat", month: "Şubat" },
+        { weekNumber: 6, dateRange: "5-10 Şubat", month: "Şubat" },
+        { weekNumber: 7, dateRange: "11-16 Şubat", month: "Şubat" },
+        { weekNumber: 8, dateRange: "17-22 Şubat", month: "Şubat" },
+        { weekNumber: 9, dateRange: "23-28 Şubat", month: "Şubat" },
+        // Mart
+        { weekNumber: 10, dateRange: "1-6 Mart", month: "Mart" },
+        { weekNumber: 11, dateRange: "7-12 Mart", month: "Mart" },
+        { weekNumber: 12, dateRange: "13-18 Mart", month: "Mart" },
+        { weekNumber: 13, dateRange: "19-24 Mart", month: "Mart" },
+        { weekNumber: 14, dateRange: "25-30 Mart", month: "Mart" },
+        // Nisan
+        { weekNumber: 15, dateRange: "31 Mart - 5 Nisan", month: "Nisan" },
+        { weekNumber: 16, dateRange: "6-11 Nisan", month: "Nisan" },
+        { weekNumber: 17, dateRange: "12-17 Nisan", month: "Nisan" },
+        { weekNumber: 18, dateRange: "18-23 Nisan", month: "Nisan" },
+        { weekNumber: 19, dateRange: "24-29 Nisan", month: "Nisan" },
+        // Mayıs
+        { weekNumber: 20, dateRange: "30 Nisan - 5 Mayıs", month: "Mayıs" },
+        { weekNumber: 21, dateRange: "6-11 Mayıs", month: "Mayıs" },
+        { weekNumber: 22, dateRange: "12-17 Mayıs", month: "Mayıs" },
+        { weekNumber: 23, dateRange: "18-23 Mayıs", month: "Mayıs" },
+        { weekNumber: 24, dateRange: "24-29 Mayıs", month: "Mayıs" },
+        // Haziran - Summer period starts
+        { weekNumber: 25, dateRange: "30 Mayıs - 4 Haziran", month: "Haziran" },
+        { weekNumber: 26, dateRange: "5-10 Haziran", month: "Haziran" },
+        { weekNumber: 27, dateRange: "11-16 Haziran", month: "Haziran" },
+        { weekNumber: 28, dateRange: "17-22 Haziran", month: "Haziran" },
+        { weekNumber: 29, dateRange: "23-28 Haziran", month: "Haziran" },
+        // Temmuz
+        { weekNumber: 30, dateRange: "29 Haziran - 4 Temmuz", month: "Temmuz" },
+        { weekNumber: 31, dateRange: "5-10 Temmuz", month: "Temmuz" },
+        { weekNumber: 32, dateRange: "11-16 Temmuz", month: "Temmuz" },
+        { weekNumber: 33, dateRange: "17-22 Temmuz", month: "Temmuz" },
+        { weekNumber: 34, dateRange: "23-28 Temmuz", month: "Temmuz" },
+        // Ağustos
+        { weekNumber: 35, dateRange: "29 Temmuz - 3 Ağustos", month: "Ağustos" },
+        { weekNumber: 36, dateRange: "4-9 Ağustos", month: "Ağustos" },
+        { weekNumber: 37, dateRange: "10-15 Ağustos", month: "Ağustos" },
+        { weekNumber: 38, dateRange: "16-21 Ağustos", month: "Ağustos" },
+        { weekNumber: 39, dateRange: "22-27 Ağustos", month: "Ağustos" },
+        // Eylül - Summer period ends
+        { weekNumber: 40, dateRange: "28 Ağustos - 2 Eylül", month: "Eylül" },
+        { weekNumber: 41, dateRange: "3-8 Eylül", month: "Eylül" },
+        { weekNumber: 42, dateRange: "9-14 Eylül", month: "Eylül" },
+        { weekNumber: 43, dateRange: "15-20 Eylül", month: "Eylül" },
+        { weekNumber: 44, dateRange: "21-26 Eylül", month: "Eylül" },
+        // Ekim
+        { weekNumber: 45, dateRange: "27 Eylül - 2 Ekim", month: "Ekim" },
+        { weekNumber: 46, dateRange: "3-8 Ekim", month: "Ekim" },
+        { weekNumber: 47, dateRange: "9-14 Ekim", month: "Ekim" },
+        { weekNumber: 48, dateRange: "15-20 Ekim", month: "Ekim" },
+        { weekNumber: 49, dateRange: "21-26 Ekim", month: "Ekim" },
+        { weekNumber: 50, dateRange: "27 Ekim - 1 Kasım", month: "Ekim" },
+        // Kasım
+        { weekNumber: 51, dateRange: "2-7 Kasım", month: "Kasım" },
+        { weekNumber: 52, dateRange: "8-13 Kasım", month: "Kasım" },
+        { weekNumber: 53, dateRange: "14-19 Kasım", month: "Kasım" },
+        { weekNumber: 54, dateRange: "20-25 Kasım", month: "Kasım" },
+        { weekNumber: 55, dateRange: "26 Kasım - 1 Aralık", month: "Kasım" },
+        // Aralık
+        { weekNumber: 56, dateRange: "2-7 Aralık", month: "Aralık" },
+        { weekNumber: 57, dateRange: "8-13 Aralık", month: "Aralık" },
+        { weekNumber: 58, dateRange: "14-19 Aralık", month: "Aralık" },
+        { weekNumber: 59, dateRange: "20-25 Aralık", month: "Aralık" },
+        { weekNumber: 60, dateRange: "26-31 Aralık", month: "Aralık" },
+      ];
+    } else if (selectedYear === 2027) {
+      return [
+        // Ocak
+        { weekNumber: 1, dateRange: "4-9 Ocak", month: "Ocak" },
+        { weekNumber: 2, dateRange: "10-15 Ocak", month: "Ocak" },
+        { weekNumber: 3, dateRange: "16-21 Ocak", month: "Ocak" },
+        { weekNumber: 4, dateRange: "22-27 Ocak", month: "Ocak" },
+        // Şubat
+        { weekNumber: 5, dateRange: "28 Ocak - 2 Şubat", month: "Şubat" },
+        { weekNumber: 6, dateRange: "3-8 Şubat", month: "Şubat" },
+        { weekNumber: 7, dateRange: "9-14 Şubat", month: "Şubat" },
+        { weekNumber: 8, dateRange: "15-20 Şubat", month: "Şubat" },
+        { weekNumber: 9, dateRange: "21-26 Şubat", month: "Şubat" },
+        // Mart
+        { weekNumber: 10, dateRange: "27 Şubat - 4 Mart", month: "Mart" },
+        { weekNumber: 11, dateRange: "5-10 Mart", month: "Mart" },
+        { weekNumber: 12, dateRange: "11-16 Mart", month: "Mart" },
+        { weekNumber: 13, dateRange: "17-22 Mart", month: "Mart" },
+        { weekNumber: 14, dateRange: "23-28 Mart", month: "Mart" },
+        // Nisan
+        { weekNumber: 15, dateRange: "29 Mart - 3 Nisan", month: "Nisan" },
+        { weekNumber: 16, dateRange: "4-9 Nisan", month: "Nisan" },
+        { weekNumber: 17, dateRange: "10-15 Nisan", month: "Nisan" },
+        { weekNumber: 18, dateRange: "16-21 Nisan", month: "Nisan" },
+        { weekNumber: 19, dateRange: "22-27 Nisan", month: "Nisan" },
+        // Mayıs
+        { weekNumber: 20, dateRange: "28 Nisan - 3 Mayıs", month: "Mayıs" },
+        { weekNumber: 21, dateRange: "4-9 Mayıs", month: "Mayıs" },
+        { weekNumber: 22, dateRange: "10-15 Mayıs", month: "Mayıs" },
+        { weekNumber: 23, dateRange: "16-21 Mayıs", month: "Mayıs" },
+        { weekNumber: 24, dateRange: "22-27 Mayıs", month: "Mayıs" },
+        // Haziran - Summer period starts
+        { weekNumber: 25, dateRange: "28 Mayıs - 2 Haziran", month: "Haziran" },
+        { weekNumber: 26, dateRange: "3-8 Haziran", month: "Haziran" },
+        { weekNumber: 27, dateRange: "9-14 Haziran", month: "Haziran" },
+        { weekNumber: 28, dateRange: "15-20 Haziran", month: "Haziran" },
+        { weekNumber: 29, dateRange: "21-26 Haziran", month: "Haziran" },
+        // Temmuz
+        { weekNumber: 30, dateRange: "27 Haziran - 2 Temmuz", month: "Temmuz" },
+        { weekNumber: 31, dateRange: "3-8 Temmuz", month: "Temmuz" },
+        { weekNumber: 32, dateRange: "9-14 Temmuz", month: "Temmuz" },
+        { weekNumber: 33, dateRange: "15-20 Temmuz", month: "Temmuz" },
+        { weekNumber: 34, dateRange: "21-26 Temmuz", month: "Temmuz" },
+        // Ağustos
+        { weekNumber: 35, dateRange: "27 Temmuz - 1 Ağustos", month: "Ağustos" },
+        { weekNumber: 36, dateRange: "2-7 Ağustos", month: "Ağustos" },
+        { weekNumber: 37, dateRange: "8-13 Ağustos", month: "Ağustos" },
+        { weekNumber: 38, dateRange: "14-19 Ağustos", month: "Ağustos" },
+        { weekNumber: 39, dateRange: "20-25 Ağustos", month: "Ağustos" },
+        { weekNumber: 40, dateRange: "26-31 Ağustos", month: "Ağustos" },
+        // Eylül - Summer period ends
+        { weekNumber: 41, dateRange: "1-6 Eylül", month: "Eylül" },
+        { weekNumber: 42, dateRange: "7-12 Eylül", month: "Eylül" },
+        { weekNumber: 43, dateRange: "13-18 Eylül", month: "Eylül" },
+        { weekNumber: 44, dateRange: "19-24 Eylül", month: "Eylül" },
+        { weekNumber: 45, dateRange: "25-30 Eylül", month: "Eylül" },
+        // Ekim
+        { weekNumber: 46, dateRange: "1-6 Ekim", month: "Ekim" },
+        { weekNumber: 47, dateRange: "7-12 Ekim", month: "Ekim" },
+        { weekNumber: 48, dateRange: "13-18 Ekim", month: "Ekim" },
+        { weekNumber: 49, dateRange: "19-24 Ekim", month: "Ekim" },
+        { weekNumber: 50, dateRange: "25-30 Ekim", month: "Ekim" },
+        // Kasım
+        { weekNumber: 51, dateRange: "31 Ekim - 5 Kasım", month: "Kasım" },
+        { weekNumber: 52, dateRange: "6-11 Kasım", month: "Kasım" },
+        { weekNumber: 53, dateRange: "12-17 Kasım", month: "Kasım" },
+        { weekNumber: 54, dateRange: "18-23 Kasım", month: "Kasım" },
+        { weekNumber: 55, dateRange: "24-29 Kasım", month: "Kasım" },
+        // Aralık
+        { weekNumber: 56, dateRange: "30 Kasım - 5 Aralık", month: "Aralık" },
+        { weekNumber: 57, dateRange: "6-11 Aralık", month: "Aralık" },
+        { weekNumber: 58, dateRange: "12-17 Aralık", month: "Aralık" },
+        { weekNumber: 59, dateRange: "18-23 Aralık", month: "Aralık" },
+        { weekNumber: 60, dateRange: "24-29 Aralık", month: "Aralık" },
+        { weekNumber: 61, dateRange: "30 Aralık - 4 Ocak", month: "Aralık" },
+      ];
+    }
+    return [];
+  }, [selectedYear]);
 
-  // Summer leave periods (20 June - 8 September school closure period)
-  const summerLeaveWeeks: SummerLeaveEntry[] = useMemo(() => [
-    { weekNumber: 26, startDate: "04 Haziran", endDate: "09 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 27, startDate: "10 Haziran", endDate: "15 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 28, startDate: "16 Haziran", endDate: "21 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 29, startDate: "22 Haziran", endDate: "27 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 30, startDate: "28 Haziran", endDate: "03 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 31, startDate: "04 Temmuz", endDate: "09 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 32, startDate: "10 Temmuz", endDate: "15 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 33, startDate: "16 Temmuz", endDate: "21 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 34, startDate: "22 Temmuz", endDate: "27 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    // Ağustos 2025 izin planı
-    { weekNumber: 35, startDate: "28 Temmuz", endDate: "02 Ağustos", person1: "Selahattin KUT", person2: "Uğraş AKYOL", person3: "", person4: "", person5: "", approved: true },
-    { weekNumber: 36, startDate: "03 Ağustos", endDate: "08 Ağustos", person1: "Selim KANDEMİRLİ", person2: "", person3: "", person4: "", person5: "", approved: true },
-    { weekNumber: 37, startDate: "09 Ağustos", endDate: "14 Ağustos", person1: "Uğraş AKYOL", person2: "M.Kemal ONUR", person3: "Selahattin KUT", person4: "", person5: "", approved: true },
-    { weekNumber: 38, startDate: "15 Ağustos", endDate: "20 Ağustos", person1: "Uğraş AKYOL", person2: "Kağan TATLICI", person3: "Harun DOKUZ (BK)", person4: "", person5: "", approved: true },
-    { weekNumber: 39, startDate: "21 Ağustos", endDate: "26 Ağustos", person1: "Turgut KAYA", person2: "Berker İRİCİOĞLU", person3: "Cihan BASA", person4: "", person5: "", approved: true },
-    { weekNumber: 40, startDate: "27 Ağustos", endDate: "01 Eylül", person1: "Serhat YALÇIN", person2: "Aytaç BAHADIR", person3: "Taylan GÜLER", person4: "", person5: "", approved: true },
-    // Eylül 2025 izin planı
-    { weekNumber: 41, startDate: "02 Eylül", endDate: "07 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Selahattin KUT", person3: "Aytaç BAHADIR", person4: "", person5: "", approved: true },
-    { weekNumber: 42, startDate: "08 Eylül", endDate: "13 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "", person3: "", person4: "", person5: "", approved: true },
-    { weekNumber: 43, startDate: "14 Eylül", endDate: "19 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Turgut KAYA", person3: "", person4: "", person5: "", approved: true },
-    { weekNumber: 44, startDate: "20 Eylül", endDate: "25 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-    { weekNumber: 45, startDate: "26 Eylül", endDate: "01 Ekim", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-  ], []);
+  // Summer leave periods (20 June - 8 September school closure period) - get data based on selected year
+  const summerLeaveWeeks: SummerLeaveEntry[] = useMemo(() => {
+    if (selectedYear === 2025) {
+      return [
+        { weekNumber: 26, startDate: "04 Haziran", endDate: "09 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 27, startDate: "10 Haziran", endDate: "15 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 28, startDate: "16 Haziran", endDate: "21 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 29, startDate: "22 Haziran", endDate: "27 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 30, startDate: "28 Haziran", endDate: "03 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 31, startDate: "04 Temmuz", endDate: "09 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 32, startDate: "10 Temmuz", endDate: "15 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 33, startDate: "16 Temmuz", endDate: "21 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 34, startDate: "22 Temmuz", endDate: "27 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        // Ağustos 2025 izin planı
+        { weekNumber: 35, startDate: "28 Temmuz", endDate: "02 Ağustos", person1: "Selahattin KUT", person2: "Uğraş AKYOL", person3: "", person4: "", person5: "", approved: true },
+        { weekNumber: 36, startDate: "03 Ağustos", endDate: "08 Ağustos", person1: "Selim KANDEMİRLİ", person2: "", person3: "", person4: "", person5: "", approved: true },
+        { weekNumber: 37, startDate: "09 Ağustos", endDate: "14 Ağustos", person1: "Uğraş AKYOL", person2: "M.Kemal ONUR", person3: "Selahattin KUT", person4: "", person5: "", approved: true },
+        { weekNumber: 38, startDate: "15 Ağustos", endDate: "20 Ağustos", person1: "Uğraş AKYOL", person2: "Kağan TATLICI", person3: "Harun DOKUZ (BK)", person4: "", person5: "", approved: true },
+        { weekNumber: 39, startDate: "21 Ağustos", endDate: "26 Ağustos", person1: "Turgut KAYA", person2: "Berker İRİCİOĞLU", person3: "Cihan BASA", person4: "", person5: "", approved: true },
+        { weekNumber: 40, startDate: "27 Ağustos", endDate: "01 Eylül", person1: "Serhat YALÇIN", person2: "Aytaç BAHADIR", person3: "Taylan GÜLER", person4: "", person5: "", approved: true },
+        // Eylül 2025 izin planı
+        { weekNumber: 41, startDate: "02 Eylül", endDate: "07 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Selahattin KUT", person3: "Aytaç BAHADIR", person4: "", person5: "", approved: true },
+        { weekNumber: 42, startDate: "08 Eylül", endDate: "13 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "", person3: "", person4: "", person5: "", approved: true },
+        { weekNumber: 43, startDate: "14 Eylül", endDate: "19 Eylül", person1: "Kıvanç ERGÖNÜL", person2: "Turgut KAYA", person3: "", person4: "", person5: "", approved: true },
+        { weekNumber: 44, startDate: "20 Eylül", endDate: "25 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 45, startDate: "26 Eylül", endDate: "01 Ekim", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+      ];
+    } else if (selectedYear === 2026) {
+      return [
+        { weekNumber: 26, startDate: "05 Haziran", endDate: "10 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 27, startDate: "11 Haziran", endDate: "16 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 28, startDate: "17 Haziran", endDate: "22 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 29, startDate: "23 Haziran", endDate: "28 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 30, startDate: "29 Haziran", endDate: "04 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 31, startDate: "05 Temmuz", endDate: "10 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 32, startDate: "11 Temmuz", endDate: "16 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 33, startDate: "17 Temmuz", endDate: "22 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 34, startDate: "23 Temmuz", endDate: "28 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 35, startDate: "29 Temmuz", endDate: "03 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 36, startDate: "04 Ağustos", endDate: "09 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 37, startDate: "10 Ağustos", endDate: "15 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 38, startDate: "16 Ağustos", endDate: "21 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 39, startDate: "22 Ağustos", endDate: "27 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 40, startDate: "28 Ağustos", endDate: "02 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 41, startDate: "03 Eylül", endDate: "08 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 42, startDate: "09 Eylül", endDate: "14 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 43, startDate: "15 Eylül", endDate: "20 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 44, startDate: "21 Eylül", endDate: "26 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 45, startDate: "27 Eylül", endDate: "02 Ekim", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+      ];
+    } else if (selectedYear === 2027) {
+      return [
+        { weekNumber: 26, startDate: "03 Haziran", endDate: "08 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 27, startDate: "09 Haziran", endDate: "14 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 28, startDate: "15 Haziran", endDate: "20 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 29, startDate: "21 Haziran", endDate: "26 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 30, startDate: "27 Haziran", endDate: "02 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 31, startDate: "03 Temmuz", endDate: "08 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 32, startDate: "09 Temmuz", endDate: "14 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 33, startDate: "15 Temmuz", endDate: "20 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 34, startDate: "21 Temmuz", endDate: "26 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 35, startDate: "27 Temmuz", endDate: "01 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 36, startDate: "02 Ağustos", endDate: "07 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 37, startDate: "08 Ağustos", endDate: "13 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 38, startDate: "14 Ağustos", endDate: "19 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 39, startDate: "20 Ağustos", endDate: "25 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 40, startDate: "26 Ağustos", endDate: "31 Ağustos", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 41, startDate: "01 Eylül", endDate: "06 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 42, startDate: "07 Eylül", endDate: "12 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 43, startDate: "13 Eylül", endDate: "18 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 44, startDate: "19 Eylül", endDate: "24 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 45, startDate: "25 Eylül", endDate: "30 Eylül", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+      ];
+    }
+    return [];
+  }, [selectedYear]);
 
   const [selectedPerson, setSelectedPerson] = useState<string>("");
   // Get current month name in Turkish
@@ -194,6 +403,11 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   const [summerLeaveData, setSummerLeaveData] = useState<SummerLeaveEntry[]>(summerLeaveWeeks);
 
   const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+  // Update summer leave data when year changes
+  useEffect(() => {
+    setSummerLeaveData(summerLeaveWeeks);
+  }, [summerLeaveWeeks]);
 
   // Initialize annual leave data and transfer approved summer leaves
   useEffect(() => {
@@ -344,7 +558,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
       {/* Header */}
-      <header style={{ backgroundColor: "#1e40af", color: "white", padding: "16px" }}>
+      <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center", lineHeight: "1.3", flex: 1 }}>
             İzin Yönetim Paneli
@@ -372,8 +586,59 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         </div>
       </header>
 
+      {/* Year Tabs */}
+      <div style={{ padding: "16px 16px 0 16px" }}>
+        <div style={{
+          backgroundColor: "white",
+          borderRadius: "12px",
+          padding: "16px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          marginBottom: "16px"
+        }}>
+          <div style={{
+            display: "flex",
+            gap: "8px",
+            justifyContent: "center",
+            flexWrap: "wrap"
+          }}>
+            {[2025, 2026, 2027].map(year => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                style={{
+                  padding: "12px 24px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  borderRadius: "8px",
+                  border: "2px solid #e5e7eb",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  backgroundColor: selectedYear === year ? "#059669" : "white",
+                  color: selectedYear === year ? "white" : "#374151",
+                  minWidth: "120px"
+                }}
+                onMouseOver={(e) => {
+                  if (selectedYear !== year) {
+                    (e.target as HTMLElement).style.backgroundColor = "#eff6ff";
+                    (e.target as HTMLElement).style.borderColor = "#bfdbfe";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (selectedYear !== year) {
+                    (e.target as HTMLElement).style.backgroundColor = "white";
+                    (e.target as HTMLElement).style.borderColor = "#e5e7eb";
+                  }
+                }}
+              >
+                {year} Yılı
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Person Selection */}
-      <div style={{ padding: "16px" }}>
+      <div style={{ padding: "0 16px" }}>
         <div style={{
           backgroundColor: "white",
           borderRadius: "12px",
@@ -433,18 +698,48 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               alignItems: "center",
               gap: "6px"
             }}>
-              📅 2025 Yılı Önemli Tarihler
+              📅 {selectedYear} Yılı Önemli Tarihler
             </h3>
             <div style={{ color: "#1e40af", fontSize: "13px", lineHeight: "1.5" }}>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Ramazan Bayramı:</strong> 30 Mart - 1 Nisan
-              </div>
-              <div style={{ marginBottom: "4px" }}>
-                <strong>Kurban Bayramı:</strong> 6 - 9 Haziran
-              </div>
-              <div>
-                <strong>Yaz Tatili:</strong> 20 Haziran - 8 Eylül
-              </div>
+              {selectedYear === 2025 && (
+                <>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Ramazan Bayramı:</strong> 30 Mart - 1 Nisan
+                  </div>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Kurban Bayramı:</strong> 6 - 9 Haziran
+                  </div>
+                  <div>
+                    <strong>Yaz Tatili:</strong> 20 Haziran - 8 Eylül
+                  </div>
+                </>
+              )}
+              {selectedYear === 2026 && (
+                <>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Ramazan Bayramı:</strong> 20 Mart - 22 Mart
+                  </div>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Kurban Bayramı:</strong> 27 Mayıs - 30 Mayıs
+                  </div>
+                  <div>
+                    <strong>Yaz Tatili:</strong> 27 Haziran - 7 Eylül
+                  </div>
+                </>
+              )}
+              {selectedYear === 2027 && (
+                <>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Ramazan Bayramı:</strong> 9 Mart - 11 Mart
+                  </div>
+                  <div style={{ marginBottom: "4px" }}>
+                    <strong>Kurban Bayramı:</strong> 16 Mayıs - 19 Mayıs
+                  </div>
+                  <div>
+                    <strong>Yaz Tatili:</strong> 19 Haziran - 6 Eylül
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -477,7 +772,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                 alignItems: "center",
                 gap: "6px"
               }}>
-                📋 2025 YILI İZİN PLANLAMASI
+                📋 {selectedYear} YILI İZİN PLANLAMASI
               </h2>
               <button
                 onClick={handleSaveAnnualLeave}
@@ -576,7 +871,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               borderRadius: "6px",
               border: "1px solid #a7f3d0"
             }}>
-              {currentMonth === "Tümü" ? "📅 TÜM AYLAR" : `📅 ${currentMonth.toUpperCase()} 2025`}
+              {currentMonth === "Tümü" ? "📅 TÜM AYLAR" : `📅 ${currentMonth.toUpperCase()} ${selectedYear}`}
             </div>
 
             {/* Annual Leave Table - Mobile Cards */}
@@ -678,7 +973,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                 alignItems: "center",
                 gap: "6px"
               }}>
-                🏖️ 2025 YAZ DÖNEMİ İZİN TALEP ÇİZELGESİ
+                🏖️ {selectedYear} YAZ DÖNEMİ İZİN TALEP ÇİZELGESİ
               </h2>
               <button
                 onClick={handleSaveSummerLeave}
