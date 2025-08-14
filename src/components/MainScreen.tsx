@@ -4,9 +4,8 @@ import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
 import { useAutoMigration } from "../hooks/useAutoMigration";
-import { realCaptainsData } from "../data/captainsData";
-import { ShiftService } from "../services/database";
-import type { ShiftData as FirestoreShiftData } from "../services/database";
+import { ShiftService, LeaveService, CaptainService } from "../services/database";
+import type { ShiftData as FirestoreShiftData, LeaveEntry, Captain } from "../services/database";
 
 type View = "main" | "captains" | "protocol" | "bonus" | "leave";
 
@@ -30,6 +29,10 @@ const MainScreen: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [firestoreShifts, setFirestoreShifts] = useState<FirestoreShiftData[]>([]);
   const [shiftsLoaded, setShiftsLoaded] = useState<boolean>(false);
+  const [leaveData, setLeaveData] = useState<LeaveEntry[]>([]);
+  const [leaveDataLoaded, setLeaveDataLoaded] = useState<boolean>(false);
+  const [captains, setCaptains] = useState<Captain[]>([]);
+  const [captainsLoaded, setCaptainsLoaded] = useState<boolean>(false);
 
   const openExternalLink = useCallback((url: string) => {
     window.open(url, "_blank");
@@ -62,6 +65,43 @@ const MainScreen: React.FC = () => {
 
     if (isInitialized) {
       loadShifts();
+    }
+  }, [isInitialized]);
+
+  // Load leave data from Firestore
+  useEffect(() => {
+    const loadLeaveData = async () => {
+      try {
+        const currentYear = new Date().getFullYear();
+        const leaves = await LeaveService.getLeavesByYear(currentYear);
+        setLeaveData(leaves);
+        setLeaveDataLoaded(true);
+      } catch (error) {
+        console.error("❌ Leave data yükleme hatası:", error);
+        setLeaveDataLoaded(true); // Still set to true to show fallback
+      }
+    };
+
+    if (isInitialized) {
+      loadLeaveData();
+    }
+  }, [isInitialized]);
+
+  // Load captains data from Firestore
+  useEffect(() => {
+    const loadCaptains = async () => {
+      try {
+        const captainsData = await CaptainService.getAllCaptains();
+        setCaptains(captainsData);
+        setCaptainsLoaded(true);
+      } catch (error) {
+        console.error("❌ Captains yükleme hatası:", error);
+        setCaptainsLoaded(true); // Still set to true to show fallback
+      }
+    };
+
+    if (isInitialized) {
+      loadCaptains();
     }
   }, [isInitialized]);
 
@@ -201,47 +241,44 @@ const MainScreen: React.FC = () => {
     };
   };
 
-  // Memoized active pilot count calculation
+  // Memoized active pilot count calculation - now uses Firestore data
   const activePilotCount = useMemo((): number => {
-    return realCaptainsData.filter(captain => 
+    if (!captainsLoaded || captains.length === 0) {
+      // Fallback count while loading
+      return 21; // Default active pilot count
+    }
+    
+    return captains.filter(captain => 
       captain.durum === "Aktif" && 
       captain.isim.trim() !== ""
     ).length;
-  }, [realCaptainsData]);
+  }, [captains, captainsLoaded]);
 
-  // Function to get pilots on leave for a specific shift
-  const getPilotsOnLeaveForShift = (shiftNumber: number): string[] => {
-    // Real leave data from LeaveManagement - this matches summer leave schedule
-    const actualLeaveData: { [key: number]: string[] } = {
-      // 28 Temmuz - 02 Ağustos (35. Vardiya)
-      35: ["Selahattin KUT", "Uğraş AKYOL"],
-      // 03 - 08 Ağustos (36. Vardiya)  
-      36: ["Selim KANDEMİRLİ"],
-      // 09 - 14 Ağustos (37. Vardiya)
-      37: ["Uğraş AKYOL", "M.Kemal ONUR", "Selahattin KUT"],
-      // 15 - 20 Ağustos (38. Vardiya)
-      38: ["Uğraş AKYOL", "Kağan TATLICI", "Harun DOKUZ (BK)"],
-      // 21 - 26 Ağustos (39. Vardiya)
-      39: ["Turgut KAYA", "Berker İRİCİOĞLU", "Cihan BASA"],
-      // 27 Ağustos - 01 Eylül (40. Vardiya)
-      40: ["Serhat YALÇIN", "Aytaç BAHADIR", "Taylan GÜLER"],
-      // 02 - 07 Eylül (41. Vardiya)
-      41: ["Kıvanç ERGÖNÜL", "Selahattin KUT", "Aytaç BAHADIR"],
-      // 08 - 13 Eylül (42. Vardiya)
-      42: ["Kıvanç ERGÖNÜL"],
-      // 14 - 19 Eylül (43. Vardiya)
-      43: ["Kıvanç ERGÖNÜL", "Turgut KAYA"],
-      // 20 - 25 Eylül (44. Vardiya) - empty
-      44: [],
-      // 26 Eylül - 01 Ekim (45. Vardiya) - empty
-      45: [],
-    };
+  // Function to get pilots on leave for a specific shift - now uses Firestore data
+  const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
+    if (!leaveDataLoaded) {
+      // While loading Firestore data, return empty array
+      return [];
+    }
+
+    // Use Firestore data - find leave entries for this shift number
+    const leaveEntriesForShift = leaveData.filter(leave => 
+      leave.weekNumber === shiftNumber && 
+      leave.year === new Date().getFullYear()
+    );
     
-    return actualLeaveData[shiftNumber] || [];
-  };
+    // Combine all pilots from all leave entries for this shift
+    const pilotsOnLeave: string[] = [];
+    leaveEntriesForShift.forEach(entry => {
+      pilotsOnLeave.push(...entry.pilots);
+    });
+    
+    // Remove duplicates and return
+    return [...new Set(pilotsOnLeave)];
+  }, [leaveData, leaveDataLoaded]);
 
   // Function to calculate working and leave counts for a shift
-  const calculateShiftCounts = (shiftNumber: number): { working: number; onLeave: number } => {
+  const calculateShiftCounts = useCallback((shiftNumber: number): { working: number; onLeave: number } => {
     const pilotsOnLeave = getPilotsOnLeaveForShift(shiftNumber);
     const onLeaveCount = pilotsOnLeave.length;
     const workingCount = activePilotCount - onLeaveCount;
@@ -250,7 +287,7 @@ const MainScreen: React.FC = () => {
       working: workingCount,
       onLeave: onLeaveCount
     };
-  };
+  }, [leaveData, leaveDataLoaded, activePilotCount]);
 
   // Get shift number for a date (timezone-safe)
   const getShiftNumber = (date: Date): number | null => {

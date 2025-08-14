@@ -189,6 +189,66 @@ export class LeaveService {
       updatedAt: Timestamp.now()
     });
   }
+
+  static async deleteLeave(id: string): Promise<void> {
+    const docRef = doc(db, this.collectionName, id);
+    await deleteDoc(docRef);
+  }
+
+  static async deleteLeaveByWeekAndYear(weekNumber: number, year: number, type: 'summer' | 'annual'): Promise<void> {
+    const leavesRef = collection(db, this.collectionName);
+    const q = query(
+      leavesRef,
+      where('year', '==', year),
+      where('weekNumber', '==', weekNumber),
+      where('type', '==', type)
+    );
+    const snapshot = await getDocs(q);
+    
+    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  }
+
+  static async upsertLeave(leave: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    // Check if a record already exists for this week/year/type
+    const leavesRef = collection(db, this.collectionName);
+    const q = query(
+      leavesRef,
+      where('year', '==', leave.year),
+      where('weekNumber', '==', leave.weekNumber),
+      where('type', '==', leave.type)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      // No existing record, create new one
+      return await this.addLeave(leave);
+    } else {
+      // Update existing record
+      const existingDoc = snapshot.docs[0];
+      await updateDoc(existingDoc.ref, {
+        ...leave,
+        updatedAt: Timestamp.now()
+      });
+      return existingDoc.id;
+    }
+  }
+
+  static async batchUpsertLeaves(leaves: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<string[]> {
+    const results: string[] = [];
+    
+    // Process in batches of 10 to avoid Firestore limits
+    const batchSize = 10;
+    for (let i = 0; i < leaves.length; i += batchSize) {
+      const batch = leaves.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map(leave => this.upsertLeave(leave))
+      );
+      results.push(...batchResults);
+    }
+    
+    return results;
+  }
 }
 
 // Shift Service

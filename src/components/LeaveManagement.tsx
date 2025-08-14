@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 import { LeaveService, CaptainService } from "../services/database";
-import type { Captain as FirestoreCaptain } from "../services/database";
+import type { Captain as FirestoreCaptain, LeaveEntry } from "../services/database";
 
 // Use Captain type from database service
 type Captain = FirestoreCaptain;
@@ -44,31 +44,9 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   const [selectedYear, setSelectedYear] = useState<number>(2025);
   const [captains, setCaptains] = useState<Captain[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
   
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [captainsData] = await Promise.all([
-        CaptainService.getAllCaptains(),
-        LeaveService.getLeavesByYear(selectedYear)
-      ]);
-      
-      setCaptains(captainsData);
-      
-      // TODO: Convert Firestore leave data to component state in future enhancement
-      
-    } catch (error) {
-      console.error('Error loading leave data:', error);
-      showError('İzin verileri yüklenirken hata oluştu!');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedYear, showError]);
-
-  // Load captains and leave data from Firestore
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // Load captains and leave data from Firestore - moved after state definitions
 
   // Captain data loaded from Firestore
 
@@ -537,62 +515,125 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     return annualLeaveData.filter(week => week.month === currentMonth);
   };
 
-  // Save functions
+  // Helper functions for card highlighting
+  const getPilotCountForWeek = (week: AnnualLeaveEntry): number => {
+    return [week.person1, week.person2, week.person3, week.person4]
+      .filter(p => p !== '' && p !== '*').length;
+  };
+
+  const getCardBackgroundColor = (pilotCount: number): string => {
+    if (pilotCount <= 3 && pilotCount > 0) return "#f0fdf4"; // Açık pastel yeşil
+    if (pilotCount === 4) return "#fef2f2"; // Açık pastel kırmızı
+    return "white"; // Default beyaz
+  };
+
+  const getCardBorderColor = (pilotCount: number): string => {
+    if (pilotCount <= 3 && pilotCount > 0) return "#bbf7d0"; // Yeşil border
+    if (pilotCount === 4) return "#fecaca"; // Kırmızı border
+    return "#e5e7eb"; // Default gri
+  };
+
+  const getPilotCountForSummerWeek = (week: SummerLeaveEntry): number => {
+    return [week.person1, week.person2, week.person3, week.person4, week.person5]
+      .filter(p => p !== '' && p !== '*').length;
+  };
+
+  // Save functions with smart create/delete logic
   const handleSaveAnnualLeave = async () => {
+    if (saving) return;
+    setSaving(true);
     try {
-      // Convert annual leave data to Firestore format
-      const leaveEntries = annualLeaveData.map(week => {
-        const pilots = [week.person1, week.person2, week.person3, week.person4].filter(p => p !== '');
-        return {
-          weekNumber: week.weekNumber,
-          startDate: week.dateRange.split('-')[0].trim(),
-          endDate: week.dateRange.split('-')[1]?.trim() || week.dateRange,
-          year: selectedYear,
-          month: week.month,
-          pilots,
-          approved: true,
-          type: 'annual' as const
-        };
-      }).filter(entry => entry.pilots.length > 0); // Only save weeks with assigned pilots
+      const updatePromises: Promise<any>[] = [];
+      const leaveEntries: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>[] = [];
       
-      // Save each entry
-      await Promise.all(
-        leaveEntries.map(entry => LeaveService.addLeave(entry))
-      );
+      // Process each week and separate deletes from upserts
+      for (const week of annualLeaveData) {
+        const pilots = [week.person1, week.person2, week.person3, week.person4]
+          .filter(p => p !== '' && p !== '*'); // Filter out empty and asterisk values
+        
+        if (pilots.length === 0) {
+          // No pilots assigned - delete any existing record
+          updatePromises.push(
+            LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'annual')
+          );
+        } else {
+          // Pilots assigned - prepare for upsert
+          leaveEntries.push({
+            weekNumber: week.weekNumber,
+            startDate: week.dateRange.split('-')[0].trim(),
+            endDate: week.dateRange.split('-')[1]?.trim() || week.dateRange,
+            year: selectedYear,
+            month: week.month,
+            pilots,
+            approved: true,
+            type: 'annual' as const
+          });
+        }
+      }
       
-      showSuccess("📋 Yıllık izin verileri kaydedildi!");
+      // Execute all deletes
+      await Promise.all(updatePromises);
+      
+      // Batch upsert all leave entries
+      if (leaveEntries.length > 0) {
+        await LeaveService.batchUpsertLeaves(leaveEntries);
+      }
+      
+      showSuccess(`📋 Yıllık izin verileri kaydedildi! (${leaveEntries.length} kayıt güncellendi)`);
     } catch (error) {
       console.error('Error saving annual leave data:', error);
       showError('Yıllık izin verileri kaydedilirken hata oluştu!');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleSaveSummerLeave = async () => {
+    if (saving) return;
+    setSaving(true);
     try {
-      // Convert summer leave data to Firestore format
-      const leaveEntries = summerLeaveData.map(week => {
-        const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5].filter(p => p !== '');
-        return {
-          weekNumber: week.weekNumber,
-          startDate: week.startDate,
-          endDate: week.endDate,
-          year: selectedYear,
-          month: getMonthFromDate(week.startDate),
-          pilots,
-          approved: week.approved,
-          type: 'summer' as const
-        };
-      }).filter(entry => entry.pilots.length > 0); // Only save weeks with assigned pilots
+      const updatePromises: Promise<any>[] = [];
+      const leaveEntries: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>[] = [];
       
-      // Save each entry
-      await Promise.all(
-        leaveEntries.map(entry => LeaveService.addLeave(entry))
-      );
+      // Process each week and separate deletes from upserts
+      for (const week of summerLeaveData) {
+        const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5]
+          .filter(p => p !== '' && p !== '*'); // Filter out empty and asterisk values
+        
+        if (pilots.length === 0) {
+          // No pilots assigned - delete any existing record
+          updatePromises.push(
+            LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'summer')
+          );
+        } else {
+          // Pilots assigned - prepare for upsert
+          leaveEntries.push({
+            weekNumber: week.weekNumber,
+            startDate: week.startDate,
+            endDate: week.endDate,
+            year: selectedYear,
+            month: getMonthFromDate(week.startDate),
+            pilots,
+            approved: week.approved,
+            type: 'summer' as const
+          });
+        }
+      }
       
-      showSuccess("🏖️ Yaz izni verileri kaydedildi!");
+      // Execute all deletes
+      await Promise.all(updatePromises);
+      
+      // Batch upsert all leave entries
+      if (leaveEntries.length > 0) {
+        await LeaveService.batchUpsertLeaves(leaveEntries);
+      }
+      
+      showSuccess(`🏖️ Yaz izni verileri kaydedildi! (${leaveEntries.length} kayıt güncellendi)`);
     } catch (error) {
       console.error('Error saving summer leave data:', error);
       showError('Yaz izni verileri kaydedilirken hata oluştu!');
+    } finally {
+      setSaving(false);
     }
   };
   
@@ -605,6 +646,67 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     const month = dateStr.split(' ')[1];
     return monthNames.find(m => m === month) || 'Bilinmiyor';
   };
+
+  // Load data from Firestore
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [captainsData, leavesData] = await Promise.all([
+        CaptainService.getAllCaptains(),
+        LeaveService.getLeavesByYear(selectedYear)
+      ]);
+      
+      setCaptains(captainsData);
+      
+      // Convert Firestore leave data to component state
+      const annualLeaves = leavesData.filter(l => l.type === 'annual');
+      const summerLeaves = leavesData.filter(l => l.type === 'summer');
+      
+      // Update annual leave data with loaded data
+      const updatedAnnualData = leaveWeeksData.map(week => {
+        const existingLeave = annualLeaves.find(l => l.weekNumber === week.weekNumber);
+        return {
+          weekNumber: week.weekNumber,
+          dateRange: week.dateRange,
+          month: week.month,
+          person1: existingLeave?.pilots[0] || '',
+          person2: existingLeave?.pilots[1] || '',
+          person3: existingLeave?.pilots[2] || '',
+          person4: existingLeave?.pilots[3] || ''
+        };
+      });
+      setAnnualLeaveData(updatedAnnualData);
+      
+      // Update summer leave data with loaded data
+      const updatedSummerData = summerLeaveWeeks.map(week => {
+        const existingLeave = summerLeaves.find(l => l.weekNumber === week.weekNumber);
+        if (existingLeave) {
+          return {
+            ...week,
+            person1: existingLeave.pilots[0] || '',
+            person2: existingLeave.pilots[1] || '',
+            person3: existingLeave.pilots[2] || '',
+            person4: existingLeave.pilots[3] || '',
+            person5: existingLeave.pilots[4] || '',
+            approved: existingLeave.approved
+          };
+        }
+        return week;
+      });
+      setSummerLeaveData(updatedSummerData);
+      
+    } catch (error) {
+      console.error('Error loading leave data:', error);
+      showError('İzin verileri yüklenirken hata oluştu!');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedYear, showError, leaveWeeksData, summerLeaveWeeks]);
+
+  // Load captains and leave data from Firestore
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -897,23 +999,33 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               </h2>
               <button
                 onClick={handleSaveAnnualLeave}
+                disabled={saving}
                 style={{
-                  backgroundColor: "#1e40af",
+                  backgroundColor: saving ? "#9ca3af" : "#1e40af",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",
                   padding: "8px 16px",
                   fontSize: "14px",
                   fontWeight: "500",
-                  cursor: "pointer",
+                  cursor: saving ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px"
+                  gap: "6px",
+                  opacity: saving ? 0.7 : 1
                 }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#1d4ed8"}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#1e40af"}
+                onMouseOver={(e) => {
+                  if (!saving) {
+                    (e.target as HTMLElement).style.backgroundColor = "#1d4ed8";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!saving) {
+                    (e.target as HTMLElement).style.backgroundColor = "#1e40af";
+                  }
+                }}
               >
-                💾 Yıllık İzin Kaydet
+                {saving ? "⏳ Kaydediliyor..." : "💾 Yıllık İzin Kaydet"}
               </button>
             </div>
 
@@ -997,11 +1109,13 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
 
             {/* Annual Leave Table - Mobile Cards */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {getFilteredAnnualData().map(week => (
+              {getFilteredAnnualData().map(week => {
+                const pilotCount = getPilotCountForWeek(week);
+                return (
                 <div key={week.weekNumber} style={{
-                  backgroundColor: "white",
+                  backgroundColor: getCardBackgroundColor(pilotCount),
                   borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
+                  border: `1px solid ${getCardBorderColor(pilotCount)}`,
                   overflow: "hidden"
                 }}>
                   <div style={{
@@ -1066,7 +1180,8 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -1098,23 +1213,33 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               </h2>
               <button
                 onClick={handleSaveSummerLeave}
+                disabled={saving}
                 style={{
-                  backgroundColor: "#dc2626",
+                  backgroundColor: saving ? "#9ca3af" : "#dc2626",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",
                   padding: "8px 16px",
                   fontSize: "14px",
                   fontWeight: "500",
-                  cursor: "pointer",
+                  cursor: saving ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px"
+                  gap: "6px",
+                  opacity: saving ? 0.7 : 1
                 }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#b91c1c"}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#dc2626"}
+                onMouseOver={(e) => {
+                  if (!saving) {
+                    (e.target as HTMLElement).style.backgroundColor = "#b91c1c";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!saving) {
+                    (e.target as HTMLElement).style.backgroundColor = "#dc2626";
+                  }
+                }}
               >
-                💾 Yaz İzinleri Kaydet
+                {saving ? "⏳ Kaydediliyor..." : "💾 Yaz İzinleri Kaydet"}
               </button>
             </div>
 
@@ -1124,11 +1249,13 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
               gap: "10px"
             }}>
-              {summerLeaveData.map(week => (
+              {summerLeaveData.map(week => {
+                const pilotCount = getPilotCountForSummerWeek(week);
+                return (
                 <div key={week.weekNumber} style={{
-                  backgroundColor: "white",
+                  backgroundColor: getCardBackgroundColor(pilotCount),
                   borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
+                  border: `1px solid ${getCardBorderColor(pilotCount)}`,
                   overflow: "hidden"
                 }}>
                   <div style={{
@@ -1277,7 +1404,8 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </>
