@@ -281,9 +281,10 @@ const MainScreen: React.FC = () => {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Get first day of month (0 = Sunday)
+  // Get first day of month (0 = Monday, 6 = Sunday)
   const getFirstDayOfMonth = (year: number, month: number): number => {
-    return new Date(year, month, 1).getDay();
+    const day = new Date(year, month, 1).getDay();
+    return (day + 6) % 7;
   };
 
   // Navigation functions
@@ -782,7 +783,7 @@ const MainScreen: React.FC = () => {
 
           {/* Days of week header */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "1px", marginBottom: "4px" }}>
-            {["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"].map((day) => (
+            {["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"].map((day) => (
               <div
                 key={day}
                 style={{
