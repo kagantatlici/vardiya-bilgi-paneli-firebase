@@ -8,6 +8,8 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v3
     
@@ -18,26 +20,11 @@ jobs:
         echo "BACKUP_FILE=backup-$DATE.zip" >> $GITHUB_ENV
         echo "BACKUP_DATE=$DATE" >> $GITHUB_ENV
         
-    - name: Create Release
-      uses: actions/create-release@v1
+    - name: Create Release and Upload
+      run: |
+        gh release create backup-${{ env.BACKUP_DATE }} \
+          --title "Backup ${{ env.BACKUP_DATE }}" \
+          --notes "Otomatik proje backupi 📅 Tarih: ${{ env.BACKUP_DATE }}" \
+          ${{ env.BACKUP_FILE }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: backup-${{ env.BACKUP_DATE }}
-        release_name: Backup ${{ env.BACKUP_DATE }}
-        body: |
-          Otomatik proje backupi
-          📅 Tarih: ${{ env.BACKUP_DATE }}
-          🗂️ Dosya: ${{ env.BACKUP_FILE }}
-        draft: false
-        prerelease: false
-        
-    - name: Upload backup
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.BACKUP_FILE }}
-        asset_name: ${{ env.BACKUP_FILE }}
-        asset_content_type: application/zip
