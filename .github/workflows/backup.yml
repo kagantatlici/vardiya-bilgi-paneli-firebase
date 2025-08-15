@@ -3,7 +3,7 @@ name: GitHub Releases Backup
 on:
   schedule:
     - cron: '0 2 * * 0'  # Her Pazar 02:00
-  workflow_dispatch:  # Manuel Áal1_t1rma
+  workflow_dispatch:  # Manuel calistirma
 
 jobs:
   backup:
@@ -26,9 +26,9 @@ jobs:
         tag_name: backup-${{ env.BACKUP_DATE }}
         release_name: Backup ${{ env.BACKUP_DATE }}
         body: |
-          Otomatik proje backup'1
-          =≈ Tarih: ${{ env.BACKUP_DATE }}
-          =¬ Dosya: ${{ env.BACKUP_FILE }}
+          Otomatik proje backupi
+          📅 Tarih: ${{ env.BACKUP_DATE }}
+          🗂️ Dosya: ${{ env.BACKUP_FILE }}
         draft: false
         prerelease: false
         
