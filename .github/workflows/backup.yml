@@ -1,9 +1,9 @@
-name: Google Drive Backup
+name: GitHub Releases Backup
 
 on:
   schedule:
     - cron: '0 2 * * 0'  # Her Pazar 02:00
-  workflow_dispatch:  # Manuel çalıştırma
+  workflow_dispatch:  # Manuel Áal1_t1rma
 
 jobs:
   backup:
@@ -11,14 +11,33 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Create backup zip
+    - name: Create backup
       run: |
-        zip -r backup-$(date +%Y%m%d).zip . -x ".git/*" "node_modules/*" "dist/*"
+        DATE=$(date +%Y%m%d-%H%M%S)
+        zip -r backup-$DATE.zip . -x ".git/*" "node_modules/*" "dist/*"
+        echo "BACKUP_FILE=backup-$DATE.zip" >> $GITHUB_ENV
+        echo "BACKUP_DATE=$DATE" >> $GITHUB_ENV
         
-    - name: Upload to Google Drive
-      uses: wei/rclone@v1
+    - name: Create Release
+      uses: actions/create-release@v1
       env:
-        RCLONE_CONFIG_DRIVE_TYPE: drive
-        RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: copy backup-*.zip drive:Firebase-Backups/
+        tag_name: backup-${{ env.BACKUP_DATE }}
+        release_name: Backup ${{ env.BACKUP_DATE }}
+        body: |
+          Otomatik proje backup'1
+          =≈ Tarih: ${{ env.BACKUP_DATE }}
+          =¬ Dosya: ${{ env.BACKUP_FILE }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload backup
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.BACKUP_FILE }}
+        asset_name: ${{ env.BACKUP_FILE }}
+        asset_content_type: application/zip
