@@ -28,3 +28,9 @@ jobs:
           ${{ env.BACKUP_FILE }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Delete old releases
+      run: |
+        gh release list --limit 100 --json tagName --jq '.[].tagName' | grep "^backup-" | tail -n +3 | xargs -r -I {} gh release delete {} --yes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
