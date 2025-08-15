@@ -559,7 +559,7 @@ const MainScreen: React.FC = () => {
         <button
           onClick={() =>
             openExternalLink(
-              "https://script.google.com/macros/s/AKfycby5sVTDpxoTHDbSriD5Qq5-zRFxHD-2qs2zfn5W70VGHl5bVe8M7CtbOPbJqYM6quJ4/exec"
+              "https://gemi-trafik-2025.vercel.app/"
             )
           }
           style={{
