@@ -6,6 +6,7 @@ import LeaveManagement from "./LeaveManagement";
 import { useAutoMigration } from "../hooks/useAutoMigration";
 import { ShiftService, LeaveService, CaptainService } from "../services/database";
 import type { ShiftData as FirestoreShiftData, LeaveEntry, Captain } from "../services/database";
+import { getNextUpcomingBonus } from "../data/bonuses";
 
 type View = "main" | "captains" | "protocol" | "bonus" | "leave";
 
@@ -924,19 +925,42 @@ const MainScreen: React.FC = () => {
               Tüm İkramiyeler →
             </button>
           </div>
-          <div
-            style={{
-              backgroundColor: "#f0fdf4",
-              padding: "12px",
-              borderRadius: "8px",
-              border: "1px solid #bbf7d0",
-            }}
-          >
-            <div style={{ fontSize: "14px", fontWeight: "500", color: "#16a34a", marginBottom: "4px" }}>
-              Devlet - 2
-            </div>
-            <div style={{ fontSize: "13px", color: "#16a34a" }}>24 Mart 2025</div>
-          </div>
+          {(() => {
+            const nextBonus = getNextUpcomingBonus();
+            if (!nextBonus) {
+              return (
+                <div
+                  style={{
+                    backgroundColor: "#f3f4f6",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #d1d5db",
+                  }}
+                >
+                  <div style={{ fontSize: "14px", fontWeight: "500", color: "#6b7280", marginBottom: "4px" }}>
+                    Yaklaşan İkramiye
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#6b7280" }}>Henüz belirlenmedi</div>
+                </div>
+              );
+            }
+            
+            return (
+              <div
+                style={{
+                  backgroundColor: "#f0fdf4",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid #bbf7d0",
+                }}
+              >
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#16a34a", marginBottom: "4px" }}>
+                  {nextBonus.type}
+                </div>
+                <div style={{ fontSize: "13px", color: "#16a34a" }}>{nextBonus.date}</div>
+              </div>
+            );
+          })()}
         </div>
       </main>
     </div>

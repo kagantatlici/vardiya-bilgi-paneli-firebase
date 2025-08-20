@@ -1,32 +1,18 @@
 import React from "react";
-
-interface BonusItem {
-  id: number;
-  type: string;
-  date: string;
-}
+import { bonuses, BonusItem } from "../data/bonuses";
 
 interface BonusTableProps {
   onBack?: () => void;
 }
 
 const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
-  const bonuses: BonusItem[] = [
-    { id: 1, type: "Devlet - 1", date: "24 Ocak 2025" },
-    { id: 2, type: "Devlet - 2", date: "24 Mart 2025" },
-    { id: 3, type: "Devlet - 3", date: "02 Haziran 2025" },
-    { id: 4, type: "Devlet - 4", date: "17 Aralık 2025" },
-    { id: 5, type: "Devlet - 1", date: "15 Şubat 2026" },
-    { id: 6, type: "Devlet - 2", date: "20 Nisan 2026" },
-    { id: 7, type: "Devlet - 3", date: "15 Temmuz 2026" },
-    { id: 8, type: "Devlet - 4", date: "30 Ekim 2026" },
-    { id: 9, type: "Devlet - 1", date: "10 Ocak 2027" },
-    { id: 10, type: "Devlet - 2", date: "25 Mart 2027" },
-  ];
 
   // Get current date to highlight upcoming bonuses
   const today = new Date();
   const isUpcoming = (dateStr: string): boolean => {
+    if (dateStr.includes("(Tarih Bekleniyor)")) {
+      return true; // 2026 ikramiyeler yaklaşan olarak gösterilsin
+    }
     const [day, month, year] = dateStr.split(" ");
     const months = [
       "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
@@ -38,6 +24,9 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
   };
 
   const isPast = (dateStr: string): boolean => {
+    if (dateStr.includes("(Tarih Bekleniyor)")) {
+      return false; // 2026 ikramiyeler geçmiş olarak gösterilmesin
+    }
     const [day, month, year] = dateStr.split(" ");
     const months = [
       "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
@@ -87,7 +76,7 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
               margin: "2px 0 0 0",
               lineHeight: "1.2"
             }}>
-              2025-2027 İkramiye Takvimi
+              2025-2026 İkramiye Takvimi
             </p>
           </div>
           <div />
