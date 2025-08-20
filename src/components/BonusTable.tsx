@@ -1,6 +1,5 @@
 import React from "react";
 import { bonuses } from "../data/bonuses";
-import type { BonusItem } from "../data/bonuses";
 
 interface BonusTableProps {
   onBack?: () => void;
