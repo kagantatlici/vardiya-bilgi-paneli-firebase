@@ -550,7 +550,7 @@ const MainScreen: React.FC = () => {
       {/* Header */}
       <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}>
         <h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center", lineHeight: "1.3" }}>
-          İstanbul Boğazı 3. Posta Bilgilendirme Ekranı
+          İstanbul Boğazı 3. Vardiya Bilgilendirme Ekranı
         </h1>
       </header>
 
