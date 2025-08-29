@@ -255,33 +255,37 @@ const MainScreen: React.FC = () => {
     ).length;
   }, [captains, captainsLoaded]);
 
-// Function to get pilots on leave for a specific shift - robust filter
+// Function to get pilots on leave for a specific shift – prefer ANNUAL; fall back to approved SUMMER
 const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
   if (!leaveDataLoaded) return [];
 
-  const entries = leaveData.filter((leave: any) => {
-    const wk = Number(leave?.weekNumber);
-    const yr = Number(leave?.year);
-    const approved = (leave?.approved === undefined) ? true : leave?.approved === true;
-    return approved && yr === new Date().getFullYear() && wk === Number(shiftNumber);
-  });
+  const year = new Date().getFullYear();
 
+  // Aynı haftadaki tüm kayıtları çek
+  const sameWeek = leaveData.filter(l => l.year === year && l.weekNumber === shiftNumber);
+
+  // Öncelik: annual (nihai kayıt). Yoksa: approved summer
+  const annual = sameWeek.filter(l => l.type === 'annual' && (l.approved !== false));
+  const source = annual.length > 0
+    ? annual
+    : sameWeek.filter(l => l.type === 'summer' && l.approved === true);
+
+  // İsimleri tekilleştir (case-insensitive TR)
   const seen = new Set<string>();
-  const out: string[] = [];
-  for (const e of entries) {
-    if (Array.isArray(e?.pilots)) {
-      for (const pRaw of e.pilots) {
-        const p = String(pRaw || "").trim();
-        const key = p.toLocaleLowerCase("tr-TR");
-        if (p && !seen.has(key)) {
-          seen.add(key);
-          out.push(p);
-        }
+  const result: string[] = [];
+  for (const e of source) {
+    for (const p of e.pilots || []) {
+      const name = String(p).trim();
+      const key = name.toLocaleLowerCase("tr-TR");
+      if (name && !seen.has(key)) {
+        seen.add(key);
+        result.push(name);
       }
     }
   }
-  return out;
+  return result;
 }, [leaveData, leaveDataLoaded]);
+
 
 
   // Function to calculate working and leave counts for a shift
