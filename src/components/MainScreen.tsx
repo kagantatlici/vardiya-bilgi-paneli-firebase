@@ -255,28 +255,38 @@ const MainScreen: React.FC = () => {
     ).length;
   }, [captains, captainsLoaded]);
 
-  // Function to get pilots on leave for a specific shift - now uses Firestore data
-  const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
-    if (!leaveDataLoaded) {
-      // While loading Firestore data, return empty array
-      return [];
-    }
+ // Function to get pilots on leave for a specific shift (uses date → weekNumber mapping)
+const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
+  if (!leaveDataLoaded) {
+    return [];
+  }
 
-    // Use Firestore data - find leave entries for this shift number
-    const leaveEntriesForShift = leaveData.filter(leave => 
-      leave.weekNumber === shiftNumber && 
-      leave.year === new Date().getFullYear()
-    );
-    
-    // Combine all pilots from all leave entries for this shift
-    const pilotsOnLeave: string[] = [];
-    leaveEntriesForShift.forEach(entry => {
-      pilotsOnLeave.push(...entry.pilots);
-    });
-    
-    // Remove duplicates and return
-    return [...new Set(pilotsOnLeave)];
-  }, [leaveData, leaveDataLoaded]);
+  // Shift takviminden bu vardiyanın tarihini bul
+  const shiftInfo = shiftSchedule2025.find(s => s.shiftNumber === shiftNumber);
+  if (!shiftInfo) return [];
+
+  // Bu vardiyanın başladığı tarihi al → ona göre hafta numarası çıkar
+  const shiftDate = shiftInfo.startDateObj;
+  const onejan = new Date(shiftDate.getFullYear(), 0, 1);
+  const weekNumber = Math.ceil(
+    (((shiftDate.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7
+  );
+
+  // Firestore izinlerinden doğru haftayı çek
+  const leaveEntriesForWeek = leaveData.filter(leave => 
+    leave.weekNumber === weekNumber &&
+    leave.year === shiftDate.getFullYear()
+  );
+
+  // Aynı kaptanı 1 kez say
+  const pilotsOnLeave: string[] = [];
+  leaveEntriesForWeek.forEach(entry => {
+    pilotsOnLeave.push(...entry.pilots);
+  });
+
+  return [...new Set(pilotsOnLeave)];
+}, [leaveData, leaveDataLoaded, shiftSchedule2025]);
+
 
   // Function to calculate working and leave counts for a shift
   const calculateShiftCounts = useCallback((shiftNumber: number): { working: number; onLeave: number } => {
