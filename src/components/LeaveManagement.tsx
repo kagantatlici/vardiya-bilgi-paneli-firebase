@@ -45,10 +45,6 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   const [captains, setCaptains] = useState<Captain[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
-  
-  // Load captains and leave data from Firestore - moved after state definitions
-
-  // Captain data loaded from Firestore
 
   // Leave weeks data from shift calendar - get data based on selected year
   const leaveWeeksData: LeaveWeek[] = useMemo(() => {
@@ -338,7 +334,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         { weekNumber: 26, startDate: "03 Haziran", endDate: "08 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
         { weekNumber: 27, startDate: "09 Haziran", endDate: "14 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
         { weekNumber: 28, startDate: "15 Haziran", endDate: "20 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
-        { weekNumber: 29, startDate: "21 Haziran", endDate: "26 Haziran", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
+        { weekNumber: 29, startDate: "21 Haziran", endDate: "26 Hazinan", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
         { weekNumber: 30, startDate: "27 Haziran", endDate: "02 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
         { weekNumber: 31, startDate: "03 Temmuz", endDate: "08 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
         { weekNumber: 32, startDate: "09 Temmuz", endDate: "14 Temmuz", person1: "", person2: "", person3: "", person4: "", person5: "", approved: false },
@@ -431,7 +427,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       }
     }
 
-    // Check summer leave data
+    // Check summer leave data (block duplicate selections within the same week)
     const summerWeekData = summerLeaveData.find(w => w.weekNumber === weekNumber);
     if (summerWeekData) {
       const summerAssignments = [
@@ -522,15 +518,15 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   };
 
   const getCardBackgroundColor = (pilotCount: number): string => {
-    if (pilotCount <= 3 && pilotCount > 0) return "#f0fdf4"; // Açık pastel yeşil
-    if (pilotCount === 4) return "#fef2f2"; // Açık pastel kırmızı
-    return "white"; // Default beyaz
+    if (pilotCount <= 3 && pilotCount > 0) return "#f0fdf4";
+    if (pilotCount === 4) return "#fef2f2";
+    return "white";
   };
 
   const getCardBorderColor = (pilotCount: number): string => {
-    if (pilotCount <= 3 && pilotCount > 0) return "#bbf7d0"; // Yeşil border
-    if (pilotCount === 4) return "#fecaca"; // Kırmızı border
-    return "#e5e7eb"; // Default gri
+    if (pilotCount <= 3 && pilotCount > 0) return "#bbf7d0";
+    if (pilotCount === 4) return "#fecaca";
+    return "#e5e7eb";
   };
 
   const getPilotCountForSummerWeek = (week: SummerLeaveEntry): number => {
@@ -538,26 +534,25 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       .filter(p => p !== '' && p !== '*').length;
   };
 
-  // Save functions with smart create/delete logic
+  // Save functions with single-source rule between annual/summer
   const handleSaveAnnualLeave = async () => {
     if (saving) return;
     setSaving(true);
     try {
       const updatePromises: Promise<any>[] = [];
       const leaveEntries: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>[] = [];
-      
-      // Process each week and separate deletes from upserts
+
       for (const week of annualLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4]
-          .filter(p => p !== '' && p !== '*'); // Filter out empty and asterisk values
-        
+          .filter(p => p !== '' && p !== '*');
+
         if (pilots.length === 0) {
-          // No pilots assigned - delete any existing record
+          // Clear annual only (summer kalabilir)
           updatePromises.push(
             LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'annual')
           );
         } else {
-          // Pilots assigned - prepare for upsert
+          // Upsert annual...
           leaveEntries.push({
             weekNumber: week.weekNumber,
             startDate: week.dateRange.split('-')[0].trim(),
@@ -568,17 +563,21 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
             approved: true,
             type: 'annual' as const
           });
+          // ...ve aynı haftanın summer kaydını sil (tek kaynak kuralı)
+          updatePromises.push(
+            LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'summer')
+          );
         }
       }
-      
+
       // Execute all deletes
       await Promise.all(updatePromises);
-      
+
       // Batch upsert all leave entries
       if (leaveEntries.length > 0) {
         await LeaveService.batchUpsertLeaves(leaveEntries);
       }
-      
+
       showSuccess(`📋 Yıllık izin verileri kaydedildi! (${leaveEntries.length} kayıt güncellendi)`);
     } catch (error) {
       console.error('Error saving annual leave data:', error);
@@ -594,19 +593,18 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
     try {
       const updatePromises: Promise<any>[] = [];
       const leaveEntries: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>[] = [];
-      
-      // Process each week and separate deletes from upserts
+
       for (const week of summerLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5]
-          .filter(p => p !== '' && p !== '*'); // Filter out empty and asterisk values
-        
+          .filter(p => p !== '' && p !== '*');
+
         if (pilots.length === 0) {
-          // No pilots assigned - delete any existing record
+          // Clear summer only
           updatePromises.push(
             LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'summer')
           );
         } else {
-          // Pilots assigned - prepare for upsert
+          // Upsert summer
           leaveEntries.push({
             weekNumber: week.weekNumber,
             startDate: week.startDate,
@@ -617,17 +615,24 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
             approved: week.approved,
             type: 'summer' as const
           });
+
+          // Eğer summer onaylıysa, aynı haftanın annual kaydını sil (tek kaynak kuralı)
+          if (week.approved) {
+            updatePromises.push(
+              LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'annual')
+            );
+          }
         }
       }
-      
+
       // Execute all deletes
       await Promise.all(updatePromises);
-      
+
       // Batch upsert all leave entries
       if (leaveEntries.length > 0) {
         await LeaveService.batchUpsertLeaves(leaveEntries);
       }
-      
+
       showSuccess(`🏖️ Yaz izni verileri kaydedildi! (${leaveEntries.length} kayıt güncellendi)`);
     } catch (error) {
       console.error('Error saving summer leave data:', error);
@@ -636,7 +641,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       setSaving(false);
     }
   };
-  
+
   // Helper function to extract month from date string
   const getMonthFromDate = (dateStr: string): string => {
     const monthNames = [
@@ -655,14 +660,19 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         CaptainService.getAllCaptains(),
         LeaveService.getLeavesByYear(selectedYear)
       ]);
-      
+
       setCaptains(captainsData);
-      
-      // Convert Firestore leave data to component state
+
+      // Split by type
       const annualLeaves = leavesData.filter(l => l.type === 'annual');
       const summerLeaves = leavesData.filter(l => l.type === 'summer');
-      
-      // Update annual leave data with loaded data
+
+      // Yıl içinde annual'ı olan haftaları set'e al (tek kaynak önceliği)
+      const annualWeeksWithData = new Set(
+        annualLeaves.filter(l => (l.pilots?.length ?? 0) > 0).map(l => l.weekNumber)
+      );
+
+      // Annual UI'yi doldur
       const updatedAnnualData = leaveWeeksData.map(week => {
         const existingLeave = annualLeaves.find(l => l.weekNumber === week.weekNumber);
         return {
@@ -676,9 +686,20 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         };
       });
       setAnnualLeaveData(updatedAnnualData);
-      
-      // Update summer leave data with loaded data
+
+      // Summer UI'yi doldur (annual varsa aynı hafta summer'ı ekranda boş göster)
       const updatedSummerData = summerLeaveWeeks.map(week => {
+        if (annualWeeksWithData.has(week.weekNumber)) {
+          return {
+            ...week,
+            person1: '',
+            person2: '',
+            person3: '',
+            person4: '',
+            person5: '',
+            approved: false
+          };
+        }
         const existingLeave = summerLeaves.find(l => l.weekNumber === week.weekNumber);
         if (existingLeave) {
           return {
@@ -694,7 +715,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         return week;
       });
       setSummerLeaveData(updatedSummerData);
-      
+
     } catch (error) {
       console.error('Error loading leave data:', error);
       showError('İzin verileri yüklenirken hata oluştu!');
@@ -904,7 +925,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
               ))}
             </select>
           </div>
-          
+
           {/* Important Dates Info */}
           <div style={{
             backgroundColor: "#eff6ff",
@@ -1331,7 +1352,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                         </div>
                       ))}
                     </div>
-                    
+
                     {/* Fifth person - full width */}
                     <div style={{
                       display: "flex", 
@@ -1374,7 +1395,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
                         ))}
                       </select>
                     </div>
-                    
+
                     {/* Approval checkbox */}
                     <div style={{
                       display: "flex",
