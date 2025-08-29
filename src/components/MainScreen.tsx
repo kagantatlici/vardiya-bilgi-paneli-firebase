@@ -255,30 +255,31 @@ const MainScreen: React.FC = () => {
     ).length;
   }, [captains, captainsLoaded]);
 
- // Function to get pilots on leave for a specific shift (uses date → weekNumber mapping)
+  // Function to get pilots on leave for a specific shift - match by weekNumber
 const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
   if (!leaveDataLoaded) {
     return [];
   }
 
-  // Shift takviminden bu vardiyanın tarihini bul
+  // Bu vardiyanın tarihini bul
   const shiftInfo = shiftSchedule2025.find(s => s.shiftNumber === shiftNumber);
   if (!shiftInfo) return [];
 
-  // Bu vardiyanın başladığı tarihi al → ona göre hafta numarası çıkar
-  const shiftDate = shiftInfo.startDateObj;
-  const onejan = new Date(shiftDate.getFullYear(), 0, 1);
+  // Haftanın numarasını tarihten hesapla (ISO benzeri)
+  const year = shiftInfo.startDateObj.getFullYear();
+  const onejan = new Date(year, 0, 1);
   const weekNumber = Math.ceil(
-    (((shiftDate.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7
+    (((shiftInfo.startDateObj.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7
   );
 
-  // Firestore izinlerinden doğru haftayı çek
-  const leaveEntriesForWeek = leaveData.filter(leave => 
+  // Firestore’dan o hafta için izinleri bul
+  const leaveEntriesForWeek = leaveData.filter(leave =>
     leave.weekNumber === weekNumber &&
-    leave.year === shiftDate.getFullYear()
+    leave.year === year &&
+    leave.approved === true
   );
 
-  // Aynı kaptanı 1 kez say
+  // Tekilleştirilmiş kaptan listesi döndür
   const pilotsOnLeave: string[] = [];
   leaveEntriesForWeek.forEach(entry => {
     pilotsOnLeave.push(...entry.pilots);
@@ -286,6 +287,7 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
 
   return [...new Set(pilotsOnLeave)];
 }, [leaveData, leaveDataLoaded, shiftSchedule2025]);
+
 
 
   // Function to calculate working and leave counts for a shift
