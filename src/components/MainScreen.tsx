@@ -255,39 +255,33 @@ const MainScreen: React.FC = () => {
     ).length;
   }, [captains, captainsLoaded]);
 
-  // Function to get pilots on leave for a specific shift - match by weekNumber
+// Function to get pilots on leave for a specific shift - robust filter
 const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => {
-  if (!leaveDataLoaded) {
-    return [];
-  }
+  if (!leaveDataLoaded) return [];
 
-  // Bu vardiyanın tarihini bul
-  const shiftInfo = shiftSchedule2025.find(s => s.shiftNumber === shiftNumber);
-  if (!shiftInfo) return [];
-
-  // Haftanın numarasını tarihten hesapla (ISO benzeri)
-  const year = shiftInfo.startDateObj.getFullYear();
-  const onejan = new Date(year, 0, 1);
-  const weekNumber = Math.ceil(
-    (((shiftInfo.startDateObj.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7
-  );
-
-  // Firestore’dan o hafta için izinleri bul
-  const leaveEntriesForWeek = leaveData.filter(leave =>
-    leave.weekNumber === weekNumber &&
-    leave.year === year &&
-    leave.approved === true
-  );
-
-  // Tekilleştirilmiş kaptan listesi döndür
-  const pilotsOnLeave: string[] = [];
-  leaveEntriesForWeek.forEach(entry => {
-    pilotsOnLeave.push(...entry.pilots);
+  const entries = leaveData.filter((leave: any) => {
+    const wk = Number(leave?.weekNumber);
+    const yr = Number(leave?.year);
+    const approved = (leave?.approved === undefined) ? true : leave?.approved === true;
+    return approved && yr === new Date().getFullYear() && wk === Number(shiftNumber);
   });
 
-  return [...new Set(pilotsOnLeave)];
-}, [leaveData, leaveDataLoaded, shiftSchedule2025]);
-
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const e of entries) {
+    if (Array.isArray(e?.pilots)) {
+      for (const pRaw of e.pilots) {
+        const p = String(pRaw || "").trim();
+        const key = p.toLocaleLowerCase("tr-TR");
+        if (p && !seen.has(key)) {
+          seen.add(key);
+          out.push(p);
+        }
+      }
+    }
+  }
+  return out;
+}, [leaveData, leaveDataLoaded]);
 
 
   // Function to calculate working and leave counts for a shift
