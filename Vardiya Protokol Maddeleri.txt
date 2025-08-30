@@ -47,11 +47,10 @@ Madde 09: Baş Kılavuz Kaptan’dan idari izin isteyen ve vardiya bitiminden
 Madde 10: Vardiya içerisinde kısa süreli (saatlik) izin kullanan kılavuz
 kaptan, döndüğünde eğer sırası geçmişse, bulunduğu istasyonda sıranın
 sonuna geçer, sırası geçmemişse kendi sırasında devam eder.
-Madde 11: Bir gemiye giden kılavuz kaptan, herhangi bir sebepten dolayı
-(Arıza, Yetersizlik, Çarmıh, Pervane…) gemiyi reddettiğinde, gemiye
-çıkılmamış ise, ERP’de “Hizmet Verilemedi” seçeneğini de işaretleyerek,
-gemiye çıkılmış ise standart şekilde “Bill” düzenler ve vardiya sıra düzenini
-bozmamak adına (kendi kısmeti olarak değerlendirerek) sıra sonuna geçer.
+Madde 11: Bir gemiye giden kılavuz kaptan, herhangi bir sebepten dolayı (Arıza, Yetersizlik, Çarmıh, Pervane vb.) gemiyi reddettiğinde, gemiye çıkılmamış ise, ERP'de "Hizmet Verilemedi" seçeneğini işaretler ve vardiya sıra düzenini bozmamak adına aşağıdaki kurallara göre hareket eder:
+• Pilot botunda tek kılavuzsa, reddettiği geminin arkasından gelen ilk kılavuzlu gemiye çıkar ve istasyona dönmeksizin görevine devam eder. Başka kılavuzlu gemi yoksa İstasyona döner ve istasyondaki sıranın başına geçer.
+• Pilot botunda başka kılavuzlar varsa, pilot botu içindeki sıranın sonuna geçerek, bottaki pilotlar arasında son kılavuzlu gemiye çıkar ve istasyona dönmeksizin görevine devam etmiş olur. Başka kılavuzlu gemi yoksa İstasyona döner ve istasyondaki sıranın başına geçer.
+《☆》Gemiye çıkılmış ise, standart şekilde "Bill" düzenlenir (iş yapılmış sayılır), sıra değişmez.
 Madde 12: İhtiyaç duyulması halinde, ihtiyaç duyulan istasyondaki,
 vardiyaya en son dahil olan, Türk Boğazları Ehliyetine sahip 2 kılavuz
 kaptan, All the Way (AtW) sırasının başı kabul edilir. AtW etaba çıkması
@@ -113,10 +112,10 @@ ayrılma pozisyonu olarak düşünülmüştür)
 Madde 23: Gemiden ayrılışlarda, gemiler mümkün olduğunca borda
 bordaya bırakılmaz. Bu durumun oluşmaması için gereken tedbir önceden
 alınır.
-Madde 24: Vardiya çıkışında birinci sırada vardiyayı bitiren kılavuz kaptan,
-İnciburnu Kılavuzluk İstasyonu’nda saat 10:00’a kadar nöbetçi kalır; yerine
-başka bir nöbetçi bulmadan veya sıradaki vardiyaya nöbeti teslim etmeden
-istasyonu terk etmez.
+Madde 24: Vardiya çıkış günü (kuzeyden güneye gelirken) saat 10:00'a kadar İnciburnu Kılavuzluk İstasyonunda sürekli 1 kılavuz kaptan nöbetçi olarak bekler.
+İstasyona sonra gelen her kılavuz kaptan kendisinden önce gelen kılavuz kaptandan çıkış nöbetini devralır.
+Çıkış nöbetini devreden kılavuz kaptan vardiyadan ayrılabilir.
+Bu şekilde çıkış günü nöbeti bütün kılavuzlar arasında paylaşılmış olur.
 Madde 25: Vardiya çıkış günü, diğer vardiyanın giriş saati gelmeden, son
 gemisini, diğer vardiyadan başka bir pilota veren kılavuz kaptan, iş yapmış
 kabul edilir. Bu durum, “Herkese Eşit Sayıda Gemi” kuralı kapsamımda
