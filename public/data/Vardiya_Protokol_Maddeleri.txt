@@ -1,6 +1,6 @@
 İSTANBUL BOĞAZI
 3.VARDİYA PROTOKOLÜ
-(Son Revizyon Tarihi: 02 Nisan 2025)
+(Son Revizyon Tarihi: 30 Ağustos 2025)
 Madde 01: Vardiya giriş sıralaması, bir önceki vardiya çıkış sırasına sadık
 kalınarak yapılan sıralama olup bu sıralama, her vardiya başında ve her
 istasyon için ayrı ayrı hazırlanır. Örnek: İnciburnu vardiyaya sırası
