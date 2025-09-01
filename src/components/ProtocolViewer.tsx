@@ -184,7 +184,7 @@ const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ onBack }) => {
               margin: "2px 0 0 0",
               lineHeight: "1.2"
             }}>
-              {protocols.length} madde • Son güncelleme: 02 Nisan 2025
+              {protocols.length} madde • Son güncelleme: 30 Ağustos 2025
             </p>
           </div>
           <div />

@@ -775,6 +775,34 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
           </button>
         </div>
 
+        {/* Istanbul Strait Map Button (centered, smaller) */}
+        <div style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}>
+          <button
+            onClick={() => openExternalLink("https://kagantatlici.github.io/istanbul-strait-map/")}
+            style={{
+              backgroundColor: "#92A07F",
+              color: "#111827",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: "none",
+              display: "inline-flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              minHeight: "48px",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#7F8E6C")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#92A07F")}
+          >
+            <span style={{ fontSize: "16px" }}>🗺️</span>
+            <span style={{ textAlign: "center", lineHeight: "1.2", whiteSpace: "nowrap" }}>İstanbul Boğazı CPA Simülasyonu</span>
+          </button>
+        </div>
+
         {/* Full Month Shift Calendar */}
         <div
           style={{
