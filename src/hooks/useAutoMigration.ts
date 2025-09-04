@@ -16,19 +16,27 @@ export function useAutoMigration() {
           setIsInitialized(true);
         }
 
-        // Then check and migrate in background
-        setTimeout(async () => {
+        // Check if migration has already been run before
+        const migrationFlag = localStorage.getItem('firebase-migration-completed');
+        
+        // Only run migration if it has never been run before
+        if (!migrationFlag && mounted) {
           try {
             const existingCaptains = await CaptainService.getAllCaptains();
             
-            if (existingCaptains.length === 0 && mounted) {
-              // No data exists, run full migration silently in background
+            // Only migrate if truly no data exists AND migration never ran
+            if (existingCaptains.length === 0) {
               await migrateAllData();
+              // Mark migration as completed so it never runs again
+              localStorage.setItem('firebase-migration-completed', 'true');
+            } else {
+              // Data exists, mark migration as completed
+              localStorage.setItem('firebase-migration-completed', 'true');
             }
           } catch (error) {
             // Silent error - don't break the UI
           }
-        }, 0);
+        }
         
       } catch {
         if (mounted) {
