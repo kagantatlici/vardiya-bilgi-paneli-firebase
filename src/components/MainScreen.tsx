@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, startTransition, useEffect } from "react";
+import React, { useState, useMemo, useCallback, startTransition, useEffect, useRef } from "react";
 import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
@@ -8,7 +8,7 @@ import { ShiftService, LeaveService, CaptainService } from "../services/database
 import type { ShiftData as FirestoreShiftData, LeaveEntry, Captain } from "../services/database";
 import { getNextUpcomingBonus } from "../data/bonuses";
 
-type View = "main" | "captains" | "protocol" | "bonus" | "leave";
+  type View = "main" | "captains" | "protocol" | "bonus" | "leave" | "yearly";
 
 interface ShiftData {
   [key: string]: number; // "YYYY-MM-DD": shiftNumber
@@ -28,6 +28,43 @@ const MainScreen: React.FC = () => {
   const [today] = useState<Date>(new Date());
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
+  const [yearlyYear, setYearlyYear] = useState<number>(new Date().getFullYear());
+  const yearlyGridRef = useRef<HTMLDivElement | null>(null);
+
+  // Lazy-load html2canvas from CDN when needed
+  const ensureHtml2Canvas = useCallback(async (): Promise<any> => {
+    const w = window as any;
+    if (w.html2canvas) return w.html2canvas;
+    await new Promise<void>((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('html2canvas yüklenemedi'));
+      document.body.appendChild(s);
+    });
+    return (window as any).html2canvas;
+  }, []);
+
+  const captureYearGrid = useCallback(async () => {
+    if (!yearlyGridRef.current) return;
+    try {
+      const html2canvas = await ensureHtml2Canvas();
+      const canvas = await html2canvas(yearlyGridRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `yillik-vardiya-${yearlyYear}.png`;
+      link.click();
+    } catch (e) {
+      console.error('Ekran görüntüsü alınamadı:', e);
+      alert('Ekran görüntüsü alınırken bir hata oluştu.');
+    }
+  }, [ensureHtml2Canvas, yearlyYear]);
   const [firestoreShifts, setFirestoreShifts] = useState<FirestoreShiftData[]>([]);
   const [shiftsLoaded, setShiftsLoaded] = useState<boolean>(false);
   const [leaveData, setLeaveData] = useState<LeaveEntry[]>([]);
@@ -335,6 +372,100 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
     return (day + 6) % 7;
   };
 
+  // ---------- Yearly calendar helpers (UI only, uses same shiftData) ----------
+  const renderYearMonth = (year: number, month: number) => {
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month); // Monday-first
+    const totalCells = 42; // 6 weeks fixed grid
+
+    const monthBoxStyle: React.CSSProperties = {
+      background: "#fff",
+      border: "2px solid #111827",
+    };
+    const monthTitleStyle: React.CSSProperties = {
+      textAlign: "center",
+      fontWeight: 800,
+      fontSize: "16px",
+      letterSpacing: "1px",
+      padding: "6px 0",
+      textTransform: "uppercase",
+    };
+    const dowWrapStyle: React.CSSProperties = {
+      display: "grid",
+      gridTemplateColumns: "repeat(7, 1fr)",
+      borderTop: "1px solid #111827",
+      borderBottom: "1px solid #111827",
+    };
+    const dowCellStyle: React.CSSProperties = {
+      textAlign: "center",
+      fontWeight: 700,
+      fontSize: "11px",
+      padding: "4px 0",
+    };
+    const daysWrapStyle: React.CSSProperties = {
+      display: "grid",
+      gridTemplateColumns: "repeat(7, 1fr)",
+    };
+    const cellBase: React.CSSProperties = {
+      height: 26,
+      lineHeight: "26px",
+      textAlign: "center",
+      borderRight: "1px solid #111827",
+      borderBottom: "1px solid #111827",
+      fontSize: "12px",
+    };
+
+    const container = (
+      <div style={monthBoxStyle}>
+        <div style={monthTitleStyle}>{getMonthName(month).toUpperCase()}</div>
+        <div style={dowWrapStyle}>
+          {["PZT", "SA", "ÇA", "PE", "CU", "CTS", "PAZ"].map((d) => (
+            <div key={d} style={dowCellStyle}>{d}</div>
+          ))}
+        </div>
+        <div style={daysWrapStyle}>
+          {Array.from({ length: totalCells }).map((_, i) => {
+            const dayIndex = i - firstDay + 1;
+            const inMonth = dayIndex >= 1 && dayIndex <= daysInMonth;
+            if (!inMonth) return <div key={i} style={{ ...cellBase, background: "#fff" }} />;
+            const date = new Date(year, month, dayIndex);
+            const shiftNumber = getShiftNumber(date);
+            const isSunday = i % 7 === 6;
+            const isTodayCell = isToday(date);
+            const style: React.CSSProperties = {
+              ...cellBase,
+              background: shiftNumber ? "#fde047" : "#fff",
+              outline: isTodayCell ? "2px solid #facc15" : undefined,
+              outlineOffset: isTodayCell ? -2 : undefined,
+              color: isSunday ? "#dc2626" : undefined,
+              fontWeight: 700,
+            };
+            return (
+              <div key={i} style={style}>{dayIndex}</div>
+            );
+          })}
+        </div>
+      </div>
+    );
+    return container;
+  };
+
+  const renderYearGrid = (year: number) => {
+    const gridStyle: React.CSSProperties = {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 12,
+      padding: "12px 16px",
+    };
+    return (
+      <div ref={yearlyGridRef} style={gridStyle}>
+        {Array.from({ length: 12 }).map((_, m) => (
+          <div key={m}>{renderYearMonth(year, m)}</div>
+        ))}
+      </div>
+    );
+  };
+
   // Navigation functions
   const goToPreviousMonth = useCallback(() => {
     if (currentMonth === 0) {
@@ -511,6 +642,45 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
 
   if (currentView === "leave") {
     return <LeaveManagement onBack={goBack} />;
+  }
+
+  if (currentView === "yearly") {
+    return (
+      <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+        <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px", position: "sticky", top: 0, zIndex: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <button onClick={goBack} style={{ background: "transparent", color: "white", border: "none", fontSize: 16, cursor: "pointer" }}>← Geri</button>
+            <h1 style={{ fontSize: 18, fontWeight: 700 }}>Yıllık Vardiya Takvimi</h1>
+            <div />
+          </div>
+        </header>
+
+        <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: 12, display: "flex", justifyContent: "center", gap: 8 }}>
+          {[2025, 2026, 2027].map((y) => (
+            <button key={y} onClick={() => setYearlyYear(y)}
+              style={{ padding: "4px 12px", borderRadius: 6, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", backgroundColor: yearlyYear === y ? "#2563eb" : "#e5e7eb", color: yearlyYear === y ? "#fff" : "#374151" }}>
+              {y}
+            </button>
+          ))}
+        </div>
+
+        {/* Screenshot button (captures only the 12-month grid) */}
+        <div style={{ padding: 12, display: 'flex', justifyContent: 'center' }}>
+          <button onClick={captureYearGrid} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+            📷 Ekran Görüntüsü Al
+          </button>
+        </div>
+
+        {renderYearGrid(yearlyYear)}
+
+        <div style={{ padding: "0 16px 16px", fontSize: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 16, height: 16, border: "1px solid #111827", background: "#fde047" }} />
+            <span>Vardiya Günü</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
 
@@ -752,7 +922,7 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
           </button>
 
           <button
-            onClick={() => openExternalLink("https://script.google.com/macros/s/AKfycbzVhY5LoSCNp2jc5eFlR2WpFkAQCpFZv4DjCerecUGpIPFWgys-KjV4_UCl8DsU-5ck4g/exec")}
+            onClick={() => navigateTo("yearly")}
             style={{
               backgroundColor: "#0891b2",
               color: "white",
@@ -771,7 +941,7 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
             }}
           >
             <span style={{ fontSize: "18px" }}>📊</span>
-            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Yıllık Vardiya Takvimi Oluşturma</span>
+            <span style={{ textAlign: "center", lineHeight: "1.2" }}>Yıllık Vardiya Takvimi</span>
           </button>
         </div>
 
