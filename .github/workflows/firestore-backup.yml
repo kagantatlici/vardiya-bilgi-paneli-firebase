@@ -89,7 +89,7 @@ jobs:
         run: |
           DATE=$(date +%Y%m%d-%H%M%S)
           echo "BACKUP_DATE=$DATE" >> $GITHUB_ENV
-          node backup-firestore.mjs
+          BACKUP_DATE="$DATE" node backup-firestore.mjs
 
       - name: Create Release and upload JSON
         env:
