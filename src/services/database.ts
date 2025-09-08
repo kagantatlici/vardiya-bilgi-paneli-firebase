@@ -22,6 +22,8 @@ export interface Captain {
   isim: string;
   aisMobNo: string;
   aktifEhliyetler: string[];
+  // Serbest metin not alanı (opsiyonel)
+  notlar?: string;
   tumEhliyetler: {
     istanbul: boolean;
     canakkale: boolean;

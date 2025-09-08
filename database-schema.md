@@ -10,6 +10,7 @@ interface Captain {
   isim: string;                 // Full name
   aisMobNo: string;             // AIS-MOB number
   aktifEhliyetler: string[];    // Active licenses ["İst", "Çkl", etc.]
+  notlar?: string;              // Free-form notes (optional)
   tumEhliyetler: {              // All licenses (boolean flags)
     istanbul: boolean;
     canakkale: boolean;

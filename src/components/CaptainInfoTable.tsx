@@ -106,6 +106,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           sicilNo: selectedCaptain.sicilNo,
           isim: selectedCaptain.isim,
           aisMobNo: selectedCaptain.aisMobNo,
+          notlar: selectedCaptain.notlar || "",
           aktifEhliyetler: selectedCaptain.aktifEhliyetler,
           tumEhliyetler: selectedCaptain.tumEhliyetler,
           melbusat: selectedCaptain.melbusat,
@@ -135,6 +136,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           sicilNo: "",
           isim: "",
           aisMobNo: "",
+          notlar: "",
           aktifEhliyetler: [],
           durum: "Pasif",
           tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
@@ -145,6 +147,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           sicilNo: "",
           isim: "",
           aisMobNo: "",
+          notlar: "",
           aktifEhliyetler: [],
           durum: "Pasif",
           tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
@@ -780,6 +783,46 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
                       />
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Notlar */}
+              <div style={{ marginBottom: "24px" }}>
+                <h4 style={{
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#374151",
+                  marginBottom: "12px",
+                  borderBottom: "2px solid #e5e7eb",
+                  paddingBottom: "4px",
+                }}>
+                  📝 Notlar
+                </h4>
+                <div>
+                  <label style={{
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: "#6b7280",
+                    display: "block",
+                    marginBottom: "4px",
+                  }}>
+                    Notlar (serbest metin)
+                  </label>
+                  <textarea
+                    value={selectedCaptain.notlar || ""}
+                    onChange={(e) => handleCaptainFieldChange('notlar' as keyof Captain, e.target.value)}
+                    rows={4}
+                    placeholder="Bu pilota ilişkin notlar..."
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      fontSize: "12px",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "4px",
+                      backgroundColor: "white",
+                      resize: "vertical",
+                    }}
+                  />
                 </div>
               </div>
 
