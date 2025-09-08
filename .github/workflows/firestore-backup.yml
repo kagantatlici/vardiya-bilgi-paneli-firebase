@@ -1,103 +1,118 @@
-  - uses: actions/setup-node@v4
-    with:
-      node-version: '20'
+name: Firestore JSON Backup (free)
 
-  - name: Write service account key from secret
-    shell: bash
-    run: |
-      printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > serviceAccount.json
+on:
+  schedule:
+    - cron: '0 2 * * 0' # Sundays 02:00 UTC
+  workflow_dispatch:
 
-  - name: Create backup script (recursive, ESM)
-    shell: bash
-    run: |
-      cat > backup-firestore.mjs <<'JS'
-      import fs from 'node:fs';
-      import { initializeApp, cert } from 'firebase-admin/app';
-      import { getFirestore, Timestamp, GeoPoint } from 'firebase-admin/firestore';
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
 
-      const sa = JSON.parse(fs.readFileSync('./serviceAccount.json', 'utf8'));
-      initializeApp({ credential: cert(sa), projectId: sa.project_id });
-      const db = getFirestore();
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      function serialize(v) {
-        if (v === null || typeof v !== 'object') return v;
-        if (v instanceof Timestamp)
-          return { __type: 'timestamp', seconds: v.seconds, nanoseconds: v.nanoseconds };
-        if (v instanceof GeoPoint)
-          return { __type: 'geopoint', latitude: v.latitude, longitude: v.longitude };
-        if (Array.isArray(v)) return v.map(serialize);
-        if (v?.constructor?.name === 'DocumentReference' && typeof v.path === 'string')
-          return { __type: 'ref', path: v.path };
-        if (typeof Buffer !== 'undefined' && Buffer.isBuffer(v))
-          return { __type: 'bytes', base64: v.toString('base64') };
-        const o = {};
-        for (const [k, val] of Object.entries(v)) o[k] = serialize(val);
-        return o;
-      }
+      - name: Write service account key from secret
+        shell: bash
+        run: |
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > serviceAccount.json
 
-      async function dumpDoc(docRef) {
-        const snap = await docRef.get();
-        const out = serialize(snap.data() || {});
-        const subs = await docRef.listCollections();
-        if (subs.length) {
-          out.__collections = {};
-          for (const sub of subs) out.__collections[sub.id] = await dumpCollection(sub);
-        }
-        return out;
-      }
+      - name: Create backup script (recursive, ESM)
+        shell: bash
+        run: |
+          cat > backup-firestore.mjs <<'JS'
+          import fs from 'node:fs';
+          import { initializeApp, cert } from 'firebase-admin/app';
+          import { getFirestore, Timestamp, GeoPoint } from 'firebase-admin/firestore';
 
-      async function dumpCollection(colRef) {
-        const res = {};
-        const snap = await colRef.get();
-        for (const d of snap.docs) res[d.id] = await dumpDoc(d.ref);
-        return res;
-      }
+          const sa = JSON.parse(fs.readFileSync('./serviceAccount.json', 'utf8'));
+          initializeApp({ credential: cert(sa), projectId: sa.project_id });
+          const db = getFirestore();
 
-      (async () => {
-        const root = {};
-        const top = await db.listCollections();
-        for (const col of top) root[col.id] = await dumpCollection(col);
-        const date = process.env.BACKUP_DATE || new Date().toISOString().replace(/[:.]/g, '-').slice(0,19);
-        const file = `firestore-backup-${date}.json`;
-        fs.writeFileSync(file, JSON.stringify(root, null, 2));
-        console.log('Wrote', file);
-      })().catch(e => { console.error(e); process.exit(1); });
-      JS
+          function serialize(v) {
+            if (v === null || typeof v !== 'object') return v;
+            if (v instanceof Timestamp)
+              return { __type: 'timestamp', seconds: v.seconds, nanoseconds: v.nanoseconds };
+            if (v instanceof GeoPoint)
+              return { __type: 'geopoint', latitude: v.latitude, longitude: v.longitude };
+            if (Array.isArray(v)) return v.map(serialize);
+            if (v?.constructor?.name === 'DocumentReference' && typeof v.path === 'string')
+              return { __type: 'ref', path: v.path };
+            if (typeof Buffer !== 'undefined' && Buffer.isBuffer(v))
+              return { __type: 'bytes', base64: v.toString('base64') };
+            const o = {};
+            for (const [k, val] of Object.entries(v)) o[k] = serialize(val);
+            return o;
+          }
 
-  - name: Install minimal deps
-    shell: bash
-    run: |
-      npm i firebase-admin >/dev/null 2>&1
+          async function dumpDoc(docRef) {
+            const snap = await docRef.get();
+            const out = serialize(snap.data() || {});
+            const subs = await docRef.listCollections();
+            if (subs.length) {
+              out.__collections = {};
+              for (const sub of subs) out.__collections[sub.id] = await dumpCollection(sub);
+            }
+            return out;
+          }
 
-  - name: Run backup
-    shell: bash
-    run: |
-      DATE=$(date +%Y%m%d-%H%M%S)
-      echo "BACKUP_DATE=$DATE" >> $GITHUB_ENV
-      BACKUP_DATE="$DATE" node backup-firestore.mjs
+          async function dumpCollection(colRef) {
+            const res = {};
+            const snap = await colRef.get();
+            for (const d of snap.docs) res[d.id] = await dumpDoc(d.ref);
+            return res;
+          }
 
-  - name: Create Release and upload JSON
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    shell: bash
-    run: |
-      gh release create firestore-${{ env.BACKUP_DATE }} \
-        --title "Firestore Backup ${{ env.BACKUP_DATE }}" \
-        --notes "Automated Firestore JSON backup" \
-        firestore-backup-${{ env.BACKUP_DATE }}.json
+          (async () => {
+            const root = {};
+            const top = await db.listCollections();
+            for (const col of top) root[col.id] = await dumpCollection(col);
+            const date = process.env.BACKUP_DATE || new Date().toISOString().replace(/[:.]/g, '-').slice(0,19);
+            const file = `firestore-backup-${date}.json`;
+            fs.writeFileSync(file, JSON.stringify(root, null, 2));
+            console.log('Wrote', file);
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
 
-  - name: Delete older backups (keep 2 newest)
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    shell: bash
-    run: |
-      gh release list --json tagName,publishedAt \
-        --jq 'map(select(.tagName | startswith("firestore-"))) | sort_by(.publishedAt) | reverse | .[2:] | .[].tagName' \
-        | xargs -r -I {} gh release delete {} --yes
+      - name: Install minimal deps
+        shell: bash
+        run: |
+          npm i firebase-admin >/dev/null 2>&1
 
-  - name: Cleanup sensitive files
-    if: always()
-    shell: bash
-    run: rm -rf serviceAccount.json backup-firestore.mjs node_modules package.json package-lock.json
+      - name: Run backup
+        shell: bash
+        run: |
+          DATE=$(date +%Y%m%d-%H%M%S)
+          echo "BACKUP_DATE=$DATE" >> $GITHUB_ENV
+          node backup-firestore.mjs
+
+      - name: Create Release and upload JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release create firestore-${{ env.BACKUP_DATE }} \
+            --title "Firestore Backup ${{ env.BACKUP_DATE }}" \
+            --notes "Automated Firestore JSON backup" \
+            firestore-backup-${{ env.BACKUP_DATE }}.json
+
+      - name: Delete older backups (keep 2 newest)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release list --json tagName,publishedAt \
+            --jq 'map(select(.tagName | startswith("firestore-"))) | sort_by(.publishedAt) | reverse | .[2:] | .[].tagName' \
+            | xargs -r -I {} gh release delete {} --yes
+
+      - name: Cleanup sensitive files
+        if: always()
+        shell: bash
+        run: rm -rf serviceAccount.json backup-firestore.mjs node_modules package.json package-lock.json
