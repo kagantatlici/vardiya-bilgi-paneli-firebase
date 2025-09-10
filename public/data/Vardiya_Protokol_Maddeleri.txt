@@ -1,14 +1,14 @@
 İSTANBUL BOĞAZI
-3.VARDİYA PROTOKOLÜ
+3. VARDİYA PROTOKOLÜ
 (Son Revizyon Tarihi: 30 Ağustos 2025)
 Madde 01: Vardiya giriş sıralaması, bir önceki vardiya çıkış sırasına sadık
 kalınarak yapılan sıralama olup bu sıralama, her vardiya başında ve her
-istasyon için ayrı ayrı hazırlanır. Örnek: İnciburnu vardiyaya sırası
+istasyon için ayrı ayrı hazırlanır. Örnek: İnciburnu vardiya sırası
 hazırlanırken, önce İnciburnu’nda vardiyadan çıkanlar sıralanır. Bir önceki
 vardiyada sıra başı olan, vardiyaya önce girer. Aynı şekilde Büyükliman’da
 vardiyadan çıkanların sıralaması yapılır ve bu sıralama İnciburnu sırasının
 sonuna eklenir. (Her ne kadar istisnai bir durum olsa da, gerektiğinde
-Büyükliman vardiya sırası da yukardaki prosedürün Büyükliman istasyonuna
+Büyükliman vardiya sırası da yukarıdaki prosedürün Büyükliman istasyonuna
 uyarlanması ile yapılır)
 Madde 02: Kılavuzlu gemilerin birbirini geçme durumu, vardiya sıralamasını
 değiştirmez. Örnek: Bir kılavuz, Boğaz etabını önündeki üç gemiyi geçerek
@@ -47,7 +47,7 @@ Madde 09: Baş Kılavuz Kaptan’dan idari izin isteyen ve vardiya bitiminden
 Madde 10: Vardiya içerisinde kısa süreli (saatlik) izin kullanan kılavuz
 kaptan, döndüğünde eğer sırası geçmişse, bulunduğu istasyonda sıranın
 sonuna geçer, sırası geçmemişse kendi sırasında devam eder.
-Madde 11: Bir gemiye giden kılavuz kaptan, herhangi bir sebepten dolayı (Arıza, Yetersizlik, Çarmıh, Pervane vb.) gemiyi reddettiğinde, gemiye çıkılmamış ise, ERP'de "Hizmet Verilemedi" seçeneğini işaretler ve vardiya sıra düzenini bozmamak adına aşağıdaki kurallara göre hareket eder:
+Madde 11: Bir gemiye giden kılavuz kaptan, herhangi bir sebepten dolayı (arıza, yetersizlik, çarmıh, pervane vb.) gemiyi reddettiğinde, gemiye çıkılmamış ise, ERP'de "Hizmet Verilemedi" seçeneğini işaretler ve vardiya sıra düzenini bozmamak adına aşağıdaki kurallara göre hareket eder:
 • Pilot botunda tek kılavuzsa, reddettiği geminin arkasından gelen ilk kılavuzlu gemiye çıkar ve istasyona dönmeksizin görevine devam eder. Başka kılavuzlu gemi yoksa İstasyona döner ve istasyondaki sıranın başına geçer.
 • Pilot botunda başka kılavuzlar varsa, pilot botu içindeki sıranın sonuna geçerek, bottaki pilotlar arasında son kılavuzlu gemiye çıkar ve istasyona dönmeksizin görevine devam etmiş olur. Başka kılavuzlu gemi yoksa İstasyona döner ve istasyondaki sıranın başına geçer.
 《☆》Gemiye çıkılmış ise, standart şekilde "Bill" düzenlenir (iş yapılmış sayılır), sıra değişmez.
@@ -72,7 +72,7 @@ Madde 16: Takviye yapılacağı zamanlarda veya takviye esnasında, gemiler
 gemilere angaje olurlar.
 Madde 17: Boğaz içerisinde arıza yapan kılavuzsuz gemiye gitme,
 demirden acil gemi kaldırma, Haydarpaşa’dan kalkan gemiye katılma … gibi
-acil & ekstra bir durum oluşması halinde, “Angaje Olma Kuralı” uygulanmaz.
+acil ve/veya ekstra bir durum oluşması halinde, “Angaje Olma Kuralı” uygulanmaz.
 Böyle durumlarda, acil & ekstra durum içerisindeki gemiye yönlendirilecek
 kılavuz, Baş Kılavuz Kaptanın bilgisi dahilinde gözcüler tarafından belirlenir,
 bu husus ile ilgili görevli personele müdahalede bulunulmaz.
@@ -91,8 +91,8 @@ binişler, listedeki standart vardiya sırasına göre yapılır. (Junior Kılav
 sınırlamaları hariç tutulmak üzere, gemilerin değişmesi normal karşılanır)
 Madde 20: Kıdem esaslı fikir belirtme, seçim yapma veya vardiyadan daimi
 olarak ayrılan kılavuz kaptanın kamarasına geçme konularında, sıralama,
-kılavuzluk hizmeti kıdemine göre değil, “3.Vardiya Kadrosuna Aktif Giriş
-Kıdemi” ne bakılarak yapılır. Öncelik, teamüller gereği Baş Kılavuz ve Baş
+kılavuzluk hizmeti kıdemine göre değil, “3. Vardiya Kadrosuna Aktif Giriş
+Kıdemi (ordino tarihi)” gözetilerek yapılır. Öncelik, teamüller gereği Baş Kılavuz ve Baş
 Kılavuz Vekilinden başlamak üzere, 3.Vardiya ana kadrosundaki en eski
 kılavuz kaptanda olur. Vardiyaya aynı gün dahil olan yeni kılavuz kaptanlar,
 önceki kıdemleri ne olursa olsun eşit kabul edilir ve vardiya içi kıdem
@@ -118,12 +118,12 @@ Madde 24: Vardiya çıkış günü (kuzeyden güneye gelirken) saat 10:00'a kada
 Bu şekilde çıkış günü nöbeti bütün kılavuzlar arasında paylaşılmış olur.
 Madde 25: Vardiya çıkış günü, diğer vardiyanın giriş saati gelmeden, son
 gemisini, diğer vardiyadan başka bir pilota veren kılavuz kaptan, iş yapmış
-kabul edilir. Bu durum, “Herkese Eşit Sayıda Gemi” kuralı kapsamımda
+kabul edilir. Bu durum, “Herkese Eşit Sayıda Gemi” kuralı kapsamında
 değerlendirilmez, sonraki vardiyada kendi sırasına girer, sıra başı olmaz.
 Madde 26: Kıdemsiz (Junior) kılavuz kaptan gemi planlaması, “İlk 3 ay 150
 metreye kadar, ikinci 3 ay 200 metreye kadar, üçüncü 3 ay 250 metreye
 kadar, dokuzuncu ay sonunda da sınırsız” şekilde yapılır. Bu planlama, Baş
-Kılavuz Kaptan’ın inisiyatifinde olup gerek görüldüğü taktirde belirtilen süreler
+Kılavuz Kaptan’ın inisiyatifinde olup gerek görüldüğü takdirde belirtilen süreler
 esnetilebilir.
 Madde 27: Kıdemsiz (Junior) kılavuz kaptanların gemi alış sırası yapılırken
 veya gemiye binişlerinde binecekleri gemi boyut / tonaj olarak kendilerine
@@ -138,7 +138,7 @@ istasyonuna erken veya geç varmış sayılmaz, kendi sırasında devam eder.
 Madde 29: Yaz izin dönemi, okulların kapanacağı tarihin bir hafta öncesi ile
 açılacağı tarihin bir hafta sonrası aralığını kapsar. Yaz dönemi izinleri, her yıl
 Mart Ayının ilk haftası, önce talep toplama, sonrasında çakışma oluşur ise
-de kura aşamaları ile netleştirilir. Aynı anda kaç kişinin izine çıkabileceğine
+de kura aşamaları ile netleştirilir. Aynı anda kaç kişinin izne çıkabileceğine
 Baş Kılavuz Kaptan karar verir. Bir kişi normal şartlarda yaz döneminde en
 fazla 2 parça yani 2 vardiya izin kullanabilir. Kılavuz kaptanlar, kendi
 aralarında izin periyotlarını becayiş yapabilir. Bir kişi, planlamanın netlik
@@ -174,5 +174,5 @@ onayı doğrultusunda uygulamaya konulmuştur.
 Yürütmekte olduğumuz bu ekip çalışmasında, Hizmet Kalitesi, İş Huzuru,
 İş Barışı, Ekip Ruhu, Kurumsal İmaj ve Profesyonellik gibi bizi biz yapan
 değerlere sahip çıkmanın önemini bir kez daha hatırlatır, hepimize kazasız
-belasız, iyi çalışmalar dileriz..
+belasız, iyi çalışmalar dileriz.
 Allah Selamet Versin…
