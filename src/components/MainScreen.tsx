@@ -30,6 +30,7 @@ const MainScreen: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [yearlyYear, setYearlyYear] = useState<number>(new Date().getFullYear());
   const yearlyGridRef = useRef<HTMLDivElement | null>(null);
+  const yearlyCaptureRef = useRef<HTMLDivElement | null>(null);
 
   // Lazy-load html2canvas from CDN when needed
   const ensureHtml2Canvas = useCallback(async (): Promise<any> => {
@@ -47,10 +48,11 @@ const MainScreen: React.FC = () => {
   }, []);
 
   const captureYearGrid = useCallback(async () => {
-    if (!yearlyGridRef.current) return;
+    const target = yearlyCaptureRef.current || yearlyGridRef.current;
+    if (!target) return;
     try {
       const html2canvas = await ensureHtml2Canvas();
-      const canvas = await html2canvas(yearlyGridRef.current, {
+      const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
@@ -58,7 +60,18 @@ const MainScreen: React.FC = () => {
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `yillik-vardiya-${yearlyYear}.png`;
+      const title = `3. Vardiya ${yearlyYear} Çalışma Takvimi`;
+      const slugify = (s: string) => s
+        .replace(/[İIı]/g, 'i')
+        .replace(/[Şş]/g, 's')
+        .replace(/[Ğğ]/g, 'g')
+        .replace(/[Üü]/g, 'u')
+        .replace(/[Öö]/g, 'o')
+        .replace(/[Çç]/g, 'c')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      link.download = `${slugify(title)}.png`;
       link.click();
     } catch (e) {
       console.error('Ekran görüntüsü alınamadı:', e);
@@ -664,14 +677,30 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
           ))}
         </div>
 
-        {/* Screenshot button (captures only the 12-month grid) */}
+        {/* Screenshot button (captures title + 12-month grid) */}
         <div style={{ padding: 12, display: 'flex', justifyContent: 'center' }}>
           <button onClick={captureYearGrid} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
             📷 Ekran Görüntüsü Al
           </button>
         </div>
 
-        {renderYearGrid(yearlyYear)}
+        {/* Capture wrapper: persistent title + 12-month grid */}
+        <div
+          ref={yearlyCaptureRef}
+          style={{ background: '#ffffff', margin: '0 12px 12px', border: '2px solid #111827' }}
+        >
+          <div style={{
+            textAlign: 'center',
+            fontWeight: 800,
+            fontSize: 18,
+            letterSpacing: '0.3px',
+            padding: '10px 8px',
+            borderBottom: '2px solid #111827'
+          }}>
+            {`3. Vardiya ${yearlyYear} Çalışma Takvimi`}
+          </div>
+          {renderYearGrid(yearlyYear)}
+        </div>
 
         <div style={{ padding: "0 16px 16px", fontSize: 14 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
