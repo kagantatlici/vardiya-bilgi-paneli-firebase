@@ -765,49 +765,58 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
 
       {/* Main Content */}
       <main style={{ padding: "16px" }}>
-        {/* Primary Button - Anlık Gemi Sayıları */}
-        <button
-          onClick={() =>
-            openExternalLink(
-              "https://gemi-trafik-2025.vercel.app/"
-            )
-          }
-          style={{
-            width: "100%",
-            backgroundColor: "#059669",
-            color: "white",
-            padding: "16px 20px",
-            borderRadius: "12px",
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "12px",
-            minHeight: "60px",
-            fontSize: "18px",
-            fontWeight: "600",
-            cursor: "pointer",
-            marginBottom: "20px",
-            boxShadow: "0 4px 12px rgba(5, 150, 105, 0.3)",
-            transform: "scale(1)",
-            transition: "all 0.2s ease"
-          }}
-          onMouseOver={(e) => {
-            const target = e.target as HTMLElement;
-            target.style.backgroundColor = "#047857";
-            target.style.transform = "scale(1.02)";
-            target.style.boxShadow = "0 6px 16px rgba(5, 150, 105, 0.4)";
-          }}
-          onMouseOut={(e) => {
-            const target = e.target as HTMLElement;
-            target.style.backgroundColor = "#059669";
-            target.style.transform = "scale(1)";
-            target.style.boxShadow = "0 4px 12px rgba(5, 150, 105, 0.3)";
-          }}
-        >
-          <span style={{ fontSize: "24px" }}>🚢</span>
-          <span>📊 ANLIK GEMİ SAYILARI</span>
-        </button>
+        {/* Top Quick Links - Two Buttons */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+          {/* Anlık Gemi Sayıları (smaller) */}
+          <button
+            onClick={() => openExternalLink("https://gemi-trafik-2025.vercel.app/")}
+            style={{
+              backgroundColor: "#059669",
+              color: "white",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              minHeight: "52px",
+              fontSize: "15px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#047857")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
+          >
+            <span style={{ fontSize: "18px" }}>🚢</span>
+            <span>📊 ANLIK GEMİ SAYILARI</span>
+          </button>
+
+          {/* Pilotlu Gemi Sırası */}
+          <button
+            onClick={() => openExternalLink("https://pilot-sira.vercel.app/")}
+            style={{
+              backgroundColor: "#2563eb",
+              color: "white",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              minHeight: "52px",
+              fontSize: "15px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1d4ed8")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
+          >
+            <span style={{ fontSize: "18px" }}>🇵🇱</span>
+            <span>Pilotlu Gemi Sıralaması (Güncel)</span>
+          </button>
+        </div>
 
 
         {/* Dynamic Shift Information */}
