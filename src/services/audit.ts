@@ -3,6 +3,7 @@ import {
   collection,
   collectionGroup,
   doc,
+  setDoc,
   getDoc,
   limit,
   onSnapshot,
@@ -179,4 +180,46 @@ export const getPrevSnapshot = async (path: string): Promise<any | null> => {
   const snap = await getDoc(ref);
   if (snap.exists()) return { id: snap.id, ...snap.data() };
   return null;
+};
+
+const pick = (src: any, keys: string[]) => {
+  const out: any = {};
+  keys.forEach((k) => {
+    if (k in src) out[k] = src[k];
+  });
+  return out;
+};
+
+export const clientRevertFromAuditPath = async (auditPath: string) => {
+  // Load audit doc (contains prevSnapshot and targetPath)
+  const aSnap = await getDoc(doc(db, auditPath));
+  if (!aSnap.exists()) throw new Error('Audit kaydı bulunamadı');
+  const aData = aSnap.data() as any;
+  const prev = aData.prevSnapshot;
+  const targetPath = aData.targetPath as string;
+  if (!prev || !targetPath) throw new Error('Önceki görüntü veya hedef yol eksik');
+
+  const isLeave = targetPath.startsWith('leaves/');
+  const allowed = isLeave
+    ? ['pilots', 'approved', 'month', 'startDate', 'endDate', 'deleted', 'deletedAt', 'deletedByName']
+    : ['isim', 'aisMobNo', 'aktifEhliyetler', 'notlar', 'tumEhliyetler', 'melbusat', 'durum', 'siraNo', 'deleted', 'deletedAt', 'deletedByName'];
+
+  const data = pick(prev, allowed);
+  (data as any).updatedAt = serverTimestamp();
+
+  await setDoc(doc(db, targetPath), data, { merge: true });
+
+  const shortId = aSnap.id.slice(0, 7);
+  const humanLine = `${tsTr(new Date())} Sistem, önceki değişikliği geri aldı (kaynak kayıt: ${shortId}).`;
+  await addDoc(collection(db, targetPath, 'audit'), {
+    ts: serverTimestamp(),
+    clientTs: Date.now(),
+    changeType: 'reverted',
+    actorName: 'Sistem',
+    changedFields: [],
+    prevSnapshot: null,
+    humanLine,
+    targetPath,
+    revertedAuditId: aSnap.id,
+  });
 };

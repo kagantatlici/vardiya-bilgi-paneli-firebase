@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { AuditFeedItem } from '../services/audit';
 import { onAuditFeed } from '../services/audit';
-import { callRevertLeave, callHideAudit } from '../services/functions';
-import { onHiddenAudits } from '../services/moderation';
+import { onHiddenAudits, clientHideAudit } from '../services/moderation';
+import { clientRevertFromAuditPath } from '../services/audit';
 
 type Filter = 'today' | 'yesterday' | 'all';
 
@@ -49,8 +49,8 @@ const AuditLogPanel: React.FC = () => {
 
   const revert = async (auditPath: string) => {
     try {
-      await callRevertLeave(auditPath, adminKey || undefined);
-      alert('Geri alma isteği gönderildi.');
+      await clientRevertFromAuditPath(auditPath);
+      alert('Geri alındı.');
     } catch (e: any) {
       alert('Geri alma başarısız: ' + (e?.message || 'Bilinmeyen hata'));
     }
@@ -76,7 +76,7 @@ const AuditLogPanel: React.FC = () => {
             <button
               onClick={async () => {
                 try {
-                  await callHideAudit(it.path, adminKey || undefined);
+                  await clientHideAudit(it.path);
                   alert('Kayıt gizlendi');
                 } catch (e: any) {
                   alert('Gizleme başarısız: ' + (e?.message || 'Bilinmeyen hata'));

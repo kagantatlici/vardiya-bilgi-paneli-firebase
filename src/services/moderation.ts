@@ -1,4 +1,4 @@
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 export const onHiddenAudits = (cb: (paths: Set<string>) => void) => {
@@ -13,3 +13,10 @@ export const onHiddenAudits = (cb: (paths: Set<string>) => void) => {
   });
 };
 
+export const clientHideAudit = async (auditPath: string) => {
+  const docId = auditPath.replace(/\//g, '__');
+  await setDoc(doc(db, 'settings', 'auditHidden', 'items', docId), {
+    path: auditPath,
+    hiddenAt: serverTimestamp(),
+  }, { merge: true });
+};
