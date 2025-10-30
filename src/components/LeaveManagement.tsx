@@ -544,7 +544,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
 
       for (const week of annualLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4]
-          .filter(p => p !== '' && p !== '*');
+          .map(p => (p === '*' ? '' : p));
 
         if (pilots.length === 0) {
           // Clear annual only (summer kalabilir)
@@ -596,7 +596,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
 
       for (const week of summerLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5]
-          .filter(p => p !== '' && p !== '*');
+          .map(p => (p === '*' ? '' : p));
 
         if (pilots.length === 0) {
           // Clear summer only
