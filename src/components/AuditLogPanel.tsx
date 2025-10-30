@@ -59,7 +59,6 @@ const AuditLogPanel: React.FC = () => {
   const renderItem = (it: AuditFeedItem) => {
     const ts = (it.ts && (it.ts as any).toDate) ? (it.ts as any).toDate() : new Date();
     const time = ts.toLocaleString('tr-TR', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const isLeave = it.targetPath?.startsWith('leaves/');
     return (
       <div key={it.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 0' }}>
         <div>
