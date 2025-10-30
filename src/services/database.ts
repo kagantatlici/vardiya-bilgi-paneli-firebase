@@ -229,7 +229,10 @@ export class LeaveService {
       updatedAt: now
     });
     try {
-      await appendAuditForLeave(docRef.id, 'create', getActorName(), Object.keys(leave), null, leave);
+      const firstName = Array.isArray((leave as any).pilots)
+        ? ((leave as any).pilots.find((p: string) => (p || '').trim()) || 'Boş').trim()
+        : getActorName();
+      await appendAuditForLeave(docRef.id, 'create', firstName || getActorName(), Object.keys(leave), null, leave);
     } catch (e) {
       console.warn('Leave audit(create) yazılamadı', e);
     }
@@ -242,6 +245,7 @@ export class LeaveService {
     const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
     const changedFields = Object.keys(updates || {});
     let humanLine: string | undefined;
+    let selectedName: string | undefined;
     if (prev && updates && Array.isArray((updates as any).pilots)) {
       const prevPilots: string[] = Array.isArray((prev as any).pilots) ? (prev as any).pilots : [];
       const nextPilots: string[] = (updates as any).pilots as string[];
@@ -254,12 +258,12 @@ export class LeaveService {
         const endDate = (updates as any).endDate ?? (prev as any).endDate;
         const weekNumber = (updates as any).weekNumber ?? (prev as any).weekNumber;
         const { formatHumanLineForLeave } = await import('./audit');
-        const newName = (nextPilots[idx] || '').trim();
-        humanLine = formatHumanLineForLeave('update', newName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: updates }, prevOwner || undefined, slotNo);
+        selectedName = (nextPilots[idx] || '').trim();
+        humanLine = formatHumanLineForLeave('update', selectedName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: updates }, prevOwner || undefined, slotNo);
       }
     }
     try {
-      await appendAuditForLeave(id, 'update', getActorName(), changedFields, prev, updates, humanLine);
+      await appendAuditForLeave(id, 'update', selectedName || getActorName(), changedFields, prev, updates, humanLine);
     } catch (e) {
       console.warn('Leave audit(update) yazılamadı', e);
     }
@@ -334,6 +338,7 @@ export class LeaveService {
       const existingDoc = snapshot.docs[0];
       const prev = { id: existingDoc.id, ...existingDoc.data() } as any;
       let humanLine: string | undefined;
+      let selectedName: string | undefined;
       if (Array.isArray((leave as any).pilots)) {
         const prevPilots: string[] = Array.isArray((prev as any).pilots) ? (prev as any).pilots : [];
         const nextPilots: string[] = (leave as any).pilots as string[];
@@ -346,12 +351,12 @@ export class LeaveService {
           const endDate = (leave as any).endDate ?? prev.endDate;
           const weekNumber = (leave as any).weekNumber ?? prev.weekNumber;
           const { formatHumanLineForLeave } = await import('./audit');
-          const newName = (nextPilots[idx] || '').trim();
-          humanLine = formatHumanLineForLeave('update', newName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: leave }, prevOwner || undefined, slotNo);
+          selectedName = (nextPilots[idx] || '').trim();
+          humanLine = formatHumanLineForLeave('update', selectedName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: leave }, prevOwner || undefined, slotNo);
         }
       }
       try {
-        await appendAuditForLeave(existingDoc.id, 'update', getActorName(), Object.keys(leave), prev, leave, humanLine);
+        await appendAuditForLeave(existingDoc.id, 'update', selectedName || getActorName(), Object.keys(leave), prev, leave, humanLine);
       } catch (e) {
         console.warn('Leave audit(update) yazılamadı', e);
       }

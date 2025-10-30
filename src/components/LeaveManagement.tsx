@@ -45,6 +45,8 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   const [captains, setCaptains] = useState<Captain[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [initialAnnualMap, setInitialAnnualMap] = useState<Record<number, string[]>>({});
+  const [initialSummerMap, setInitialSummerMap] = useState<Record<number, string[]>>({});
 
   // Leave weeks data from shift calendar - get data based on selected year
   const leaveWeeksData: LeaveWeek[] = useMemo(() => {
@@ -545,9 +547,12 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       for (const week of annualLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4]
           .map(p => (p === '*' ? '' : p));
+        while (pilots.length < 4) pilots.push('');
+        const prev = initialAnnualMap[week.weekNumber] || ['', '', '', ''];
+        const changed = pilots.some((p, i) => (p || '') !== (prev[i] || ''));
+        if (!changed) continue;
 
-        if (pilots.length === 0) {
-          // Clear annual only (summer kalabilir)
+        if (pilots.every(p => p === '')) {
           updatePromises.push(
             LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'annual')
           );
@@ -597,9 +602,12 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       for (const week of summerLeaveData) {
         const pilots = [week.person1, week.person2, week.person3, week.person4, week.person5]
           .map(p => (p === '*' ? '' : p));
+        while (pilots.length < 5) pilots.push('');
+        const prev = initialSummerMap[week.weekNumber] || ['', '', '', '', ''];
+        const changed = pilots.some((p, i) => (p || '') !== (prev[i] || ''));
+        if (!changed) continue;
 
-        if (pilots.length === 0) {
-          // Clear summer only
+        if (pilots.every(p => p === '')) {
           updatePromises.push(
             LeaveService.deleteLeaveByWeekAndYear(week.weekNumber, selectedYear, 'summer')
           );
@@ -686,6 +694,13 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         };
       });
       setAnnualLeaveData(updatedAnnualData);
+      const annMap: Record<number, string[]> = {};
+      annualLeaves.forEach(l => {
+        const arr = Array.isArray(l.pilots) ? l.pilots.slice(0,4) : [];
+        while (arr.length < 4) arr.push('');
+        annMap[l.weekNumber] = arr.map(p => p || '');
+      });
+      setInitialAnnualMap(annMap);
 
       // Summer UI'yi doldur (annual varsa aynı hafta summer'ı ekranda boş göster)
       const updatedSummerData = summerLeaveWeeks.map(week => {
@@ -715,6 +730,13 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
         return week;
       });
       setSummerLeaveData(updatedSummerData);
+      const sumMap: Record<number, string[]> = {};
+      summerLeaves.forEach(l => {
+        const arr = Array.isArray(l.pilots) ? l.pilots.slice(0,5) : [];
+        while (arr.length < 5) arr.push('');
+        sumMap[l.weekNumber] = arr.map(p => p || '');
+      });
+      setInitialSummerMap(sumMap);
 
     } catch (error) {
       console.error('Error loading leave data:', error);
