@@ -1,4 +1,12 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "audit",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
