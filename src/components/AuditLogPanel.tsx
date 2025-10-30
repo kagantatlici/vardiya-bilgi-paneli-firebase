@@ -84,7 +84,7 @@ const AuditLogPanel: React.FC = () => {
               }}
               style={{ background: '#6b7280', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer' }}
             >
-              Sil
+              Gizle
             </button>
           </div>
         )}

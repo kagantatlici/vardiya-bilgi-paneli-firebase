@@ -140,6 +140,7 @@ export const appendAuditForCaptain = async (
   humanLine?: string,
 ) => {
   const ref = collection(db, 'captains', captainId, 'audit');
+  const subjectName = (prevSnapshot && (prevSnapshot as any).isim) ? (prevSnapshot as any).isim : 'Kayıt';
   await addDoc(ref, {
     ts: serverTimestamp(),
     clientTs: Date.now(),
@@ -147,7 +148,7 @@ export const appendAuditForCaptain = async (
     actorName,
     changedFields: changedFields || [],
     prevSnapshot: prevSnapshot || null,
-    humanLine: humanLine || `${tsTr(new Date())} Kılavuz Kaptan Bilgilerinde (${actorName} - ${deriveCaptainSection(changedFields)}) bir güncelleme yapıldı.`,
+    humanLine: humanLine || `${tsTr(new Date())} Kılavuz Kaptan Bilgilerinde (${subjectName} - ${deriveCaptainSection(changedFields)}) bir güncelleme yapıldı.`,
     targetPath: `captains/${captainId}`,
   });
 };
