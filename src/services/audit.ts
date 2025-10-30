@@ -91,6 +91,16 @@ export const formatHumanLineForCaptainFieldDeletion = (
   return `${tsText} ${actorName}, kılavuz kaptan bilgilerinde ${fieldName} alanını sildi.`;
 };
 
+const deriveCaptainSection = (changedFields?: string[]): string => {
+  const f = changedFields || [];
+  const has = (k: string) => f.includes(k);
+  if (has('melbusat')) return 'Melbusat Bilgileri';
+  if (has('aktifEhliyetler') || has('tumEhliyetler')) return 'Ehliyet Bilgileri';
+  if (has('durum')) return 'Durum Bilgileri';
+  if (has('siraNo')) return 'Sıra Bilgileri';
+  return 'Genel Bilgiler';
+};
+
 export const appendAuditForLeave = async (
   leaveId: string,
   changeType: ChangeType,
@@ -136,7 +146,7 @@ export const appendAuditForCaptain = async (
     actorName,
     changedFields: changedFields || [],
     prevSnapshot: prevSnapshot || null,
-    humanLine: humanLine || `${tsTr(new Date())} ${actorName}, kılavuz kaptan bilgilerinde bir güncelleme yaptı.`,
+    humanLine: humanLine || `${tsTr(new Date())} Kılavuz Kaptan Bilgilerinde (${actorName} - ${deriveCaptainSection(changedFields)}) bir güncelleme yapıldı.`,
     targetPath: `captains/${captainId}`,
   });
 };
