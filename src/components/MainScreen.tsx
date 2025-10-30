@@ -4,7 +4,6 @@ import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
 import AuditLogPanel from "./AuditLogPanel";
-import { setActorName } from "../services/actor";
 import { useAutoMigration } from "../hooks/useAutoMigration";
 import { ShiftService, LeaveService, CaptainService } from "../services/database";
 import type { ShiftData as FirestoreShiftData, LeaveEntry, Captain } from "../services/database";
