@@ -9,7 +9,8 @@ const db = admin.firestore();
 
 export const revertLeave = functions.https.onCall(async (data, context) => {
   const auditPath: string = data?.auditPath || '';
-  if (!auditPath || !/^leaves\/[A-Za-z0-9_-]+\/audit\/[A-Za-z0-9_-]+$/.test(auditPath)) {
+  const m = auditPath.match(/^((leaves|captains)\/[A-Za-z0-9_-]+)\/audit\/[A-Za-z0-9_-]+$/);
+  if (!auditPath || !m) {
     throw new functions.https.HttpsError('invalid-argument', 'Geçersiz auditPath');
   }
 
@@ -35,8 +36,8 @@ export const revertLeave = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('failed-precondition', 'Önceki görüntü bulunamadı');
   }
 
-  const [_, leaveId] = auditPath.split('/');
-  const targetRef = db.doc(`leaves/${leaveId}`);
+  const targetDocPath = m[1];
+  const targetRef = db.doc(targetDocPath);
 
   await targetRef.set(prevSnapshot, { merge: false });
 
@@ -51,7 +52,7 @@ export const revertLeave = functions.https.onCall(async (data, context) => {
     changedFields: [],
     prevSnapshot: null,
     humanLine,
-    targetPath: `leaves/${leaveId}`,
+    targetPath: targetDocPath,
     revertedAuditId: auditSnap.id,
   });
 
@@ -59,3 +60,24 @@ export const revertLeave = functions.https.onCall(async (data, context) => {
   return { ok: true };
 });
 
+export const hideAudit = functions.https.onCall(async (data, context) => {
+  const auditPath: string = data?.auditPath || '';
+  const providedKey = (context.rawRequest?.headers?.['x-admin-key'] as string) || data?.adminKey || '';
+  if (!auditPath) throw new functions.https.HttpsError('invalid-argument', 'auditPath gerekli');
+  if (!providedKey) throw new functions.https.HttpsError('permission-denied', 'Admin anahtarı eksik');
+
+  const settingsSnap = await db.doc('settings/admin').get();
+  const currentKey = settingsSnap.exists ? settingsSnap.get('adminKey') : null;
+  if (!currentKey || providedKey !== currentKey) {
+    throw new functions.https.HttpsError('permission-denied', 'Geçersiz admin anahtarı');
+  }
+
+  const docId = auditPath.replace(/\//g, '__');
+  await db.collection('settings').doc('auditHidden').collection('items').doc(docId).set({
+    path: auditPath,
+    hiddenAt: admin.firestore.FieldValue.serverTimestamp(),
+    by: 'Sistem',
+  }, { merge: true });
+
+  return { ok: true };
+});

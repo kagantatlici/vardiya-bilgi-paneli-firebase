@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { AuditFeedItem } from '../services/audit';
 import { onAuditFeed } from '../services/audit';
-import { callRevertLeave } from '../services/functions';
+import { callRevertLeave, callHideAudit } from '../services/functions';
+import { onHiddenAudits } from '../services/moderation';
 
 type Filter = 'today' | 'yesterday' | 'all';
 
@@ -22,21 +23,24 @@ const withinFilter = (ts: Date, f: Filter) => {
 
 const AuditLogPanel: React.FC = () => {
   const [items, setItems] = useState<AuditFeedItem[]>([]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<Filter>('today');
   const [expanded, setExpanded] = useState<boolean>(false);
   const adminKey = typeof window !== 'undefined' ? localStorage.getItem('adminKey') : '';
 
   useEffect(() => {
     const unsub = onAuditFeed(50, (list) => setItems(list));
-    return () => unsub();
+    const unsubHidden = onHiddenAudits((paths) => setHidden(paths));
+    return () => { unsub(); unsubHidden(); };
   }, []);
 
   const filtered = useMemo(() => {
     return items.filter((it) => {
+      if (hidden.has(it.path)) return false;
       const ts = (it.ts && (it.ts as any).toDate) ? (it.ts as any).toDate() : new Date();
       return withinFilter(ts, filter);
     });
-  }, [items, filter]);
+  }, [items, filter, hidden]);
 
   const latest = filtered[0];
   const others = filtered.slice(1);
@@ -62,13 +66,28 @@ const AuditLogPanel: React.FC = () => {
           <div style={{ fontSize: 13, color: '#111827' }}>{it.humanLine || 'Değişiklik'}</div>
           <div style={{ fontSize: 11, color: '#6b7280' }}>{time}</div>
         </div>
-        {canAdmin && isLeave && (
-          <button
-            onClick={() => revert(it.path)}
-            style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer' }}
-          >
-            Geri Al
-          </button>
+        {canAdmin && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => revert(it.path)}
+              style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer' }}
+            >
+              Geri Al
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await callHideAudit(it.path, adminKey || undefined);
+                  alert('Kayıt gizlendi');
+                } catch (e: any) {
+                  alert('Gizleme başarısız: ' + (e?.message || 'Bilinmeyen hata'));
+                }
+              }}
+              style={{ background: '#6b7280', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer' }}
+            >
+              Sil
+            </button>
+          </div>
         )}
       </div>
     );
