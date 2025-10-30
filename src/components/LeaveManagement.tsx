@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 import { LeaveService, CaptainService } from "../services/database";
+import { setActorName } from "../services/actor";
 import type { Captain as FirestoreCaptain, LeaveEntry } from "../services/database";
 
 // Use Captain type from database service
@@ -359,6 +360,10 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
   }, [selectedYear]);
 
   const [selectedPerson, setSelectedPerson] = useState<string>("");
+  // Persist selected actor for audit logs
+  useEffect(() => {
+    if (selectedPerson) setActorName(selectedPerson);
+  }, [selectedPerson]);
   // Get current month name in Turkish
   const getCurrentMonthName = () => {
     const currentDate = new Date();
