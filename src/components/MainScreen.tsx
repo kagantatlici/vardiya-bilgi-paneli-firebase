@@ -3,6 +3,8 @@ import CaptainInfoTable from "./CaptainInfoTable";
 import ProtocolViewer from "./ProtocolViewer";
 import BonusTable from "./BonusTable";
 import LeaveManagement from "./LeaveManagement";
+import AuditLogPanel from "./AuditLogPanel";
+import { setActorName } from "../services/actor";
 import { useAutoMigration } from "../hooks/useAutoMigration";
 import { ShiftService, LeaveService, CaptainService } from "../services/database";
 import type { ShiftData as FirestoreShiftData, LeaveEntry, Captain } from "../services/database";
@@ -765,6 +767,18 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
 
       {/* Main Content */}
       <main style={{ padding: "16px" }}>
+        {/* Actor name input (free text) */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <label style={{ fontSize: 12, color: '#6b7280', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>İşlemi Yapan (ad):</span>
+            <input
+              defaultValue={typeof window !== 'undefined' ? (localStorage.getItem('actorName') || '') : ''}
+              onChange={(e) => setActorName(e.target.value)}
+              placeholder="ör. Ali Y."
+              style={{ fontSize: 12, padding: '6px 8px', borderRadius: 6, border: '1px solid #d1d5db' }}
+            />
+          </label>
+        </div>
         {/* Top Quick Links - Two Buttons */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
           {/* Anlık Gemi Sayıları (smaller) */}
@@ -1207,6 +1221,11 @@ const getPilotsOnLeaveForShift = useCallback((shiftNumber: number): string[] => 
               </div>
             );
           })()}
+        </div>
+
+        {/* Son değişiklikler paneli */}
+        <div style={{ marginTop: 12 }}>
+          <AuditLogPanel />
         </div>
       </main>
     </div>
