@@ -126,7 +126,6 @@ export const appendAuditForCaptain = async (
   actorName: string,
   changedFields: string[] | undefined,
   prevSnapshot: any,
-  nextData: any,
   humanLine?: string,
 ) => {
   const ref = collection(db, 'captains', captainId, 'audit');
@@ -171,4 +170,3 @@ export const getPrevSnapshot = async (path: string): Promise<any | null> => {
   if (snap.exists()) return { id: snap.id, ...snap.data() };
   return null;
 };
-

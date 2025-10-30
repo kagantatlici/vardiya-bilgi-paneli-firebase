@@ -5,7 +5,6 @@ import {
   getDoc,
   addDoc, 
   updateDoc, 
-  deleteDoc, 
   setDoc,
   query, 
   orderBy,
@@ -111,7 +110,7 @@ export class CaptainService {
       updatedAt: now
     });
     try {
-      await appendAuditForCaptain(docRef.id, 'create', getActorName(), Object.keys(captain), null, captain);
+      await appendAuditForCaptain(docRef.id, 'create', getActorName(), Object.keys(captain), null);
     } catch (e) {
       console.warn('Captain audit(create) yazılamadı', e);
     }
@@ -141,7 +140,7 @@ export class CaptainService {
           humanLine = formatHumanLineForCaptainFieldDeletion(getActorName(), deletedField);
         }
       }
-      await appendAuditForCaptain(id, 'update', getActorName(), changedFields, prev, updates, humanLine);
+      await appendAuditForCaptain(id, 'update', getActorName(), changedFields, prev, humanLine);
     } catch (e) {
       console.warn('Captain audit(update) yazılamadı', e);
     }
@@ -160,7 +159,7 @@ export class CaptainService {
       updatedAt: Timestamp.now(),
     } as any);
     try {
-      await appendAuditForCaptain(id, 'soft_delete', actorName, ['deleted'], prev, { deleted: true });
+      await appendAuditForCaptain(id, 'soft_delete', actorName, ['deleted'], prev);
     } catch (e) {
       console.warn('Captain audit(soft_delete) yazılamadı', e);
     }

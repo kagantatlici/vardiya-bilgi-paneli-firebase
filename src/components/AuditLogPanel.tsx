@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AuditFeedItem, onAuditFeed } from '../services/audit';
+import type { AuditFeedItem } from '../services/audit';
+import { onAuditFeed } from '../services/audit';
 import { callRevertLeave } from '../services/functions';
 
 type Filter = 'today' | 'yesterday' | 'all';
@@ -122,4 +123,3 @@ const AuditLogPanel: React.FC = () => {
 };
 
 export default React.memo(AuditLogPanel);
-
