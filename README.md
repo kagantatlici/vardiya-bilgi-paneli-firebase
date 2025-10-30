@@ -137,6 +137,42 @@ npm run lint         # Code linting
 firebase deploy      # Deploy to Firebase
 ```
 
+## 🔐 AdminKey, Audit ve Geri Al (Revert)
+
+- Uygulama kimlik doğrulaması istemez; değişiklikler anında yayına alınır.
+- Yönetici yetkileri cihaz bazında `adminKey` ile etkinleşir.
+
+### Admin etkinleştirme (desktop ve telefon)
+- Tek seferlik gizli bağlantıyı açın: `/admin/link?k=<adminKey>`
+  - Örnek: `https://<site-domain>/admin/link?k=RANDOM_UZUN_ANAHTAR`
+  - Bu sayfa `localStorage.adminKey` değerini yazar, Firestore `settings/admin` belgesine anahtarı kaydeder ve “Admin etkin” gösterir.
+  - Aynı cihazda tekrar giriş gerekmez; admin kontrolleri görünür olur.
+
+### Admin anahtarını döndürme (rotate)
+- Firestore `settings/admin` belgesine yeni uzun rastgele bir anahtar yazın (`adminKey` alanı).
+- Güvenilen cihazlarda yeni bağlantıyı tekrar ziyaret edin: `/admin/link?k=<newAdminKey>`
+- Eski anahtarı bilenler artık geri alma işlemine yetkili olmaz.
+
+### Audit kaydı (ekleme/güncelleme/yumuşak silme)
+- Her izin veya pilot bilgi değişikliğinde şu veriler kaydedilir:
+  - `ts` (sunucu saati), `clientTs` (cihaz saati)
+  - `changeType`: `create | update | soft_delete | reverted`
+  - `actorName`: formdaki serbest metin (kimlik doğrulama yok)
+  - `changedFields`: sadece alan adları (değerler yok)
+  - `prevSnapshot`: önceki belgenin tam görüntüsü (geri alma için)
+  - `humanLine`: Türkçe, değerler gizlenmiş özet satır
+- Audit alt koleksiyonu: `leaves/{id}/audit/{autoId}` ve `captains/{id}/audit/{autoId}` (eklemeli, değiştirilemez/silinez)
+
+### Geri Al (admin)
+- Her audit satırında (sadece admin görünür) küçük “Geri Al” butonu bulunur.
+- Buton, callable Cloud Function `revertLeave(auditPath)` fonksiyonunu çağırır.
+- Sunucu, `settings/admin.adminKey` ile eşitliği doğrular; eşleşirse `prevSnapshot` canlı dökümana yazılır ve `reverted` türünde yeni bir audit satırı eklenir.
+
+### Güvenlik Kuralları (özet)
+- Sert silme yok: `allow delete: if false;`
+- Kimlik/hafta/slot alanları değiştirilemez (yalnızca beyaz listeli alanlar değiştirilebilir).
+- Audit alt koleksiyonları sadece `create` izni verir (eklemeli günlük).
+
 ### Code Quality
 - TypeScript strict mode
 - ESLint configuration
