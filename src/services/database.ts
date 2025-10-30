@@ -241,15 +241,32 @@ export class LeaveService {
     const prevSnap = await getDoc(docRef);
     const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
     const changedFields = Object.keys(updates || {});
+    let humanLine: string | undefined;
+    if (prev && updates && Array.isArray((updates as any).pilots)) {
+      const prevPilots: string[] = Array.isArray((prev as any).pilots) ? (prev as any).pilots : [];
+      const nextPilots: string[] = (updates as any).pilots as string[];
+      const idx = nextPilots.findIndex((p, i) => (p || '').trim() !== ((prevPilots[i] || '').trim()));
+      if (idx >= 0) {
+        const prevOwner = (prevPilots[idx] || '').trim();
+        const slotNo = idx + 1;
+        const month = (updates as any).month ?? (prev as any).month;
+        const startDate = (updates as any).startDate ?? (prev as any).startDate;
+        const endDate = (updates as any).endDate ?? (prev as any).endDate;
+        const weekNumber = (updates as any).weekNumber ?? (prev as any).weekNumber;
+        const { formatHumanLineForLeave } = await import('./audit');
+        const newName = (nextPilots[idx] || '').trim();
+        humanLine = formatHumanLineForLeave('update', newName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: updates }, prevOwner || undefined, slotNo);
+      }
+    }
+    try {
+      await appendAuditForLeave(id, 'update', getActorName(), changedFields, prev, updates, humanLine);
+    } catch (e) {
+      console.warn('Leave audit(update) yazılamadı', e);
+    }
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.now()
     });
-    try {
-      await appendAuditForLeave(id, 'update', getActorName(), changedFields, prev, updates);
-    } catch (e) {
-      console.warn('Leave audit(update) yazılamadı', e);
-    }
   }
 
   static async deleteLeave(id: string): Promise<void> {
@@ -316,15 +333,32 @@ export class LeaveService {
       // Update existing record
       const existingDoc = snapshot.docs[0];
       const prev = { id: existingDoc.id, ...existingDoc.data() } as any;
+      let humanLine: string | undefined;
+      if (Array.isArray((leave as any).pilots)) {
+        const prevPilots: string[] = Array.isArray((prev as any).pilots) ? (prev as any).pilots : [];
+        const nextPilots: string[] = (leave as any).pilots as string[];
+        const idx = nextPilots.findIndex((p, i) => (p || '').trim() !== ((prevPilots[i] || '').trim()));
+        if (idx >= 0) {
+          const prevOwner = (prevPilots[idx] || '').trim();
+          const slotNo = idx + 1;
+          const month = (leave as any).month ?? prev.month;
+          const startDate = (leave as any).startDate ?? prev.startDate;
+          const endDate = (leave as any).endDate ?? prev.endDate;
+          const weekNumber = (leave as any).weekNumber ?? prev.weekNumber;
+          const { formatHumanLineForLeave } = await import('./audit');
+          const newName = (nextPilots[idx] || '').trim();
+          humanLine = formatHumanLineForLeave('update', newName || 'Boş', { weekNumber, month, startDate, endDate, prev, next: leave }, prevOwner || undefined, slotNo);
+        }
+      }
+      try {
+        await appendAuditForLeave(existingDoc.id, 'update', getActorName(), Object.keys(leave), prev, leave, humanLine);
+      } catch (e) {
+        console.warn('Leave audit(update) yazılamadı', e);
+      }
       await updateDoc(existingDoc.ref, {
         ...leave,
         updatedAt: Timestamp.now()
       });
-      try {
-        await appendAuditForLeave(existingDoc.id, 'update', getActorName(), Object.keys(leave), prev, leave);
-      } catch (e) {
-        console.warn('Leave audit(update) yazılamadı', e);
-      }
       return existingDoc.id;
     }
   }

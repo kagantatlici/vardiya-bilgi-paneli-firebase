@@ -41,15 +41,16 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
 export const tsTr = (d: Date) => `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 
 const weekLabelFrom = (ctx: LeaveAuditContext): string => {
-  const s = ctx.startDate?.replace(/\s+/g, ' ').trim() || '';
-  const e = ctx.endDate?.replace(/\s+/g, ' ').trim() || '';
+  const s = (ctx.next?.startDate || ctx.startDate || '').toString().replace(/\s+/g, ' ').trim();
+  const e = (ctx.next?.endDate || ctx.endDate || '').toString().replace(/\s+/g, ' ').trim();
   if (s && e) {
     const sDay = s.split(' ')[0];
     const eDay = e.split(' ')[0];
-    const month = (ctx.month || '').trim();
+    const month = ((ctx.next?.month || ctx.month || '') as string).trim();
     if (sDay && eDay && month) return `${sDay}–${eDay} ${month}`;
   }
-  if (ctx.weekNumber) return `Hafta ${ctx.weekNumber}`;
+  const wn = ctx.next?.weekNumber ?? ctx.weekNumber;
+  if (wn) return `Hafta ${wn}`;
   return 'İzin haftası';
 };
 
@@ -69,19 +70,14 @@ export const formatHumanLineForLeave = (
     // This one is generated on server normally; keep here for symmetry
     return `${tsText} Sistem, önceki değişikliği geri aldı (kaynak kayıt: ?).`;
   }
-  // Detect add to 1st slot
+  // Detect add/replace
   const prevPilots: string[] = Array.isArray(ctx.prev?.pilots) ? ctx.prev.pilots : [];
   const nextPilots: string[] = Array.isArray(ctx.next?.pilots) ? ctx.next.pilots : [];
-  const firstNonEmptyIndex = nextPilots.findIndex((p) => !!(p && p.trim()));
-  if ((prevPilots.length === 0 || prevPilots.every(p => !p)) && firstNonEmptyIndex === 0) {
-    return `${tsText} ${actorName}, ${label} izin haftası 1. sıraya izin ekledi.`;
-  }
-  // Detect replace at a slot
-  if (typeof slotNo === 'number' && slotNo >= 1 && prevOwnerName) {
-    return `${tsText} ${actorName}, ${label} izin haftası ${slotNo}. sıradaki izni (${prevOwnerName}) değiştirdi.`;
-  }
-  // Fallback
-  return `${tsText} ${actorName}, ${label} üzerinde bir güncelleme yaptı.`;
+  const idx = typeof slotNo === 'number' ? slotNo - 1 : nextPilots.findIndex((p, i) => (p || '').trim() !== ((prevPilots[i] || '').trim()));
+  const effectiveSlot = (typeof slotNo === 'number' && slotNo >= 1) ? slotNo : (idx >= 0 ? idx + 1 : 1);
+  const prevName = (prevOwnerName || (idx >= 0 ? (prevPilots[idx] || '').trim() : '')) || 'Boş';
+  const newName = actorName || 'Boş';
+  return `${tsText} ${newName}, ${label} izin haftasında ${effectiveSlot}. sırada değişiklik yaptı. (Eski kayıt: ${prevName}).`;
 };
 
 export const formatHumanLineForCaptainFieldDeletion = (
@@ -120,10 +116,10 @@ export const appendAuditForLeave = async (
     changedFields: changedFields || [],
     prevSnapshot: prevSnapshot || null,
     humanLine: humanLine || formatHumanLineForLeave(changeType, actorName, {
-      weekNumber: prevSnapshot?.weekNumber ?? nextData?.weekNumber,
-      month: prevSnapshot?.month ?? nextData?.month,
-      startDate: prevSnapshot?.startDate ?? nextData?.startDate,
-      endDate: prevSnapshot?.endDate ?? nextData?.endDate,
+      weekNumber: nextData?.weekNumber ?? prevSnapshot?.weekNumber,
+      month: nextData?.month ?? prevSnapshot?.month,
+      startDate: nextData?.startDate ?? prevSnapshot?.startDate,
+      endDate: nextData?.endDate ?? prevSnapshot?.endDate,
       prev: prevSnapshot,
       next: nextData,
     }),
