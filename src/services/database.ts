@@ -14,6 +14,8 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { appendAuditForCaptain, appendAuditForLeave, formatHumanLineForCaptainFieldDeletion } from './audit';
+import { getActorName } from './actor';
 
 // Types
 export interface Captain {
@@ -80,10 +82,12 @@ export class CaptainService {
     const q = query(captainsRef, orderBy('siraNo', 'asc'));
     const snapshot = await getDocs(q);
     
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs
+      .map(doc => ({
       id: doc.id,
       ...doc.data()
-    } as Captain));
+    } as Captain))
+      .filter((c: any) => !c.deleted);
   }
 
   static async getCaptain(id: string): Promise<Captain | null> {
@@ -106,20 +110,60 @@ export class CaptainService {
       createdAt: now,
       updatedAt: now
     });
+    try {
+      await appendAuditForCaptain(docRef.id, 'create', getActorName(), Object.keys(captain), null, captain);
+    } catch (e) {
+      console.warn('Captain audit(create) yazılamadı', e);
+    }
     return docRef.id;
   }
 
   static async updateCaptain(id: string, updates: Partial<Captain>): Promise<void> {
     const docRef = doc(db, this.collectionName, id);
+    // Get previous snapshot for audit
+    const prevSnap = await getDoc(docRef);
+    const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
+    const changedFields = Object.keys(updates || {});
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.now()
     });
+    try {
+      // Detect simple field deletions for human line when string changed to empty
+      let humanLine: string | undefined;
+      if (prev && updates) {
+        const deletedField = Object.keys(updates).find((k) => {
+          const before = (prev as any)[k];
+          const after = (updates as any)[k];
+          return typeof before === 'string' && before && (after === '' || after === null || typeof after === 'undefined');
+        });
+        if (deletedField) {
+          humanLine = formatHumanLineForCaptainFieldDeletion(getActorName(), deletedField);
+        }
+      }
+      await appendAuditForCaptain(id, 'update', getActorName(), changedFields, prev, updates, humanLine);
+    } catch (e) {
+      console.warn('Captain audit(update) yazılamadı', e);
+    }
   }
 
   static async deleteCaptain(id: string): Promise<void> {
+    // Soft delete instead of hard delete
     const docRef = doc(db, this.collectionName, id);
-    await deleteDoc(docRef);
+    const prevSnap = await getDoc(docRef);
+    const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
+    const actorName = getActorName();
+    await updateDoc(docRef, {
+      deleted: true,
+      deletedAt: Timestamp.now(),
+      deletedByName: actorName,
+      updatedAt: Timestamp.now(),
+    } as any);
+    try {
+      await appendAuditForCaptain(id, 'soft_delete', actorName, ['deleted'], prev, { deleted: true });
+    } catch (e) {
+      console.warn('Captain audit(soft_delete) yazılamadı', e);
+    }
   }
 
   static async updateCaptainOrder(captains: Captain[]): Promise<void> {
@@ -157,10 +201,12 @@ export class LeaveService {
     const q = query(leavesRef, orderBy('year', 'asc'), orderBy('weekNumber', 'asc'));
     const snapshot = await getDocs(q);
     
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs
+      .map(doc => ({
       id: doc.id,
       ...doc.data()
-    } as LeaveEntry));
+    } as LeaveEntry))
+      .filter((l: any) => !l.deleted);
   }
 
   static async getLeavesByYear(year: number): Promise<LeaveEntry[]> {
@@ -168,10 +214,12 @@ export class LeaveService {
     const q = query(leavesRef, where('year', '==', year), orderBy('weekNumber', 'asc'));
     const snapshot = await getDocs(q);
     
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs
+      .map(doc => ({
       id: doc.id,
       ...doc.data()
-    } as LeaveEntry));
+    } as LeaveEntry))
+      .filter((l: any) => !l.deleted);
   }
 
   static async addLeave(leave: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -181,20 +229,47 @@ export class LeaveService {
       createdAt: now,
       updatedAt: now
     });
+    try {
+      await appendAuditForLeave(docRef.id, 'create', getActorName(), Object.keys(leave), null, leave);
+    } catch (e) {
+      console.warn('Leave audit(create) yazılamadı', e);
+    }
     return docRef.id;
   }
 
   static async updateLeave(id: string, updates: Partial<LeaveEntry>): Promise<void> {
     const docRef = doc(db, this.collectionName, id);
+    const prevSnap = await getDoc(docRef);
+    const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
+    const changedFields = Object.keys(updates || {});
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.now()
     });
+    try {
+      await appendAuditForLeave(id, 'update', getActorName(), changedFields, prev, updates);
+    } catch (e) {
+      console.warn('Leave audit(update) yazılamadı', e);
+    }
   }
 
   static async deleteLeave(id: string): Promise<void> {
+    // Soft delete instead of hard delete; also write audit
     const docRef = doc(db, this.collectionName, id);
-    await deleteDoc(docRef);
+    const prevSnap = await getDoc(docRef);
+    const prev = prevSnap.exists() ? { id: prevSnap.id, ...prevSnap.data() } : null;
+    const actorName = getActorName();
+    await updateDoc(docRef, {
+      deleted: true,
+      deletedAt: Timestamp.now(),
+      deletedByName: actorName,
+      updatedAt: Timestamp.now(),
+    } as any);
+    try {
+      await appendAuditForLeave(id, 'soft_delete', actorName, ['deleted'], prev, { deleted: true });
+    } catch (e) {
+      console.warn('Leave audit(soft_delete) yazılamadı', e);
+    }
   }
 
   static async deleteLeaveByWeekAndYear(weekNumber: number, year: number, type: 'summer' | 'annual'): Promise<void> {
@@ -206,9 +281,22 @@ export class LeaveService {
       where('type', '==', type)
     );
     const snapshot = await getDocs(q);
-    
-    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
+    const actorName = getActorName();
+    const softDeletePromises = snapshot.docs.map(async d => {
+      const prev = { id: d.id, ...d.data() };
+      await updateDoc(d.ref, {
+        deleted: true,
+        deletedAt: Timestamp.now(),
+        deletedByName: actorName,
+        updatedAt: Timestamp.now(),
+      } as any);
+      try {
+        await appendAuditForLeave(d.id, 'soft_delete', actorName, ['deleted'], prev, { deleted: true });
+      } catch (e) {
+        console.warn('Leave audit(soft_delete) yazılamadı', e);
+      }
+    });
+    await Promise.all(softDeletePromises);
   }
 
   static async upsertLeave(leave: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -228,10 +316,16 @@ export class LeaveService {
     } else {
       // Update existing record
       const existingDoc = snapshot.docs[0];
+      const prev = { id: existingDoc.id, ...existingDoc.data() } as any;
       await updateDoc(existingDoc.ref, {
         ...leave,
         updatedAt: Timestamp.now()
       });
+      try {
+        await appendAuditForLeave(existingDoc.id, 'update', getActorName(), Object.keys(leave), prev, leave);
+      } catch (e) {
+        console.warn('Leave audit(update) yazılamadı', e);
+      }
       return existingDoc.id;
     }
   }

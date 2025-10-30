@@ -1,10 +1,49 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access to all documents for now (development mode)
-    // TODO: Add proper authentication and authorization rules
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).changedKeys();
+    }
+
+    // Global read allowed; global hard-delete denied
     match /{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow delete: if false;
+    }
+
+    // Settings: only adminKey fields can be set
+    match /settings/admin {
+      allow read: if true;
+      allow create, update: if
+        changedKeys().hasOnly(['adminKey', 'updatedAt']);
+    }
+
+    // Captains main docs
+    match /captains/{id} {
+      allow create: if true;
+      allow update: if changedKeys().hasOnly([
+        'isim', 'aisMobNo', 'aktifEhliyetler', 'notlar', 'tumEhliyetler', 'melbusat',
+        'durum', 'siraNo', 'updatedAt', 'deleted', 'deletedAt', 'deletedByName'
+      ]);
+    }
+
+    // Leaves main docs
+    match /leaves/{id} {
+      allow create: if true;
+      allow update: if changedKeys().hasOnly([
+        'pilots', 'approved', 'month', 'startDate', 'endDate', 'updatedAt',
+        'deleted', 'deletedAt', 'deletedByName'
+      ]);
+    }
+
+    // Append-only audit subcollections
+    match /leaves/{id}/audit/{auditId} {
+      allow create: if true;
+      allow update, delete: if false;
+    }
+    match /captains/{id}/audit/{auditId} {
+      allow create: if true;
+      allow update, delete: if false;
     }
   }
 }
