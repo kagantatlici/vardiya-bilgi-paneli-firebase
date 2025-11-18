@@ -329,13 +329,19 @@ export class LeaveService {
       where('type', '==', leave.type)
     );
     const snapshot = await getDocs(q);
-    
-    if (snapshot.empty) {
-      // No existing record, create new one
+
+    // Prefer non-deleted document; treat soft-deleted ones as tombstones
+    const activeDocs = snapshot.docs.filter(d => {
+      const data = d.data() as any;
+      return !data.deleted;
+    });
+
+    if (activeDocs.length === 0) {
+      // No active record, create new one
       return await this.addLeave(leave);
     } else {
-      // Update existing record
-      const existingDoc = snapshot.docs[0];
+      // Update existing active record
+      const existingDoc = activeDocs[0];
       const prev = { id: existingDoc.id, ...existingDoc.data() } as any;
       let humanLine: string | undefined;
       if (Array.isArray((leave as any).pilots)) {
