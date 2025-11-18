@@ -680,11 +680,6 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       const annualLeaves = leavesData.filter(l => l.type === 'annual');
       const summerLeaves = leavesData.filter(l => l.type === 'summer');
 
-      // Yıl içinde annual'ı olan haftaları set'e al (tek kaynak önceliği)
-      const annualWeeksWithData = new Set(
-        annualLeaves.filter(l => (l.pilots?.length ?? 0) > 0).map(l => l.weekNumber)
-      );
-
       // Annual UI'yi doldur
       const updatedAnnualData = leaveWeeksData.map(week => {
         const existingLeave = annualLeaves.find(l => l.weekNumber === week.weekNumber);
@@ -707,19 +702,8 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ onBack }) => {
       });
       setInitialAnnualMap(annMap);
 
-      // Summer UI'yi doldur (annual varsa aynı hafta summer'ı ekranda boş göster)
+      // Summer UI'yi doldur (Firestore'daki summer kayıtları ile birleştir)
       const updatedSummerData = summerLeaveWeeks.map(week => {
-        if (annualWeeksWithData.has(week.weekNumber)) {
-          return {
-            ...week,
-            person1: '',
-            person2: '',
-            person3: '',
-            person4: '',
-            person5: '',
-            approved: false
-          };
-        }
         const existingLeave = summerLeaves.find(l => l.weekNumber === week.weekNumber);
         if (existingLeave) {
           return {

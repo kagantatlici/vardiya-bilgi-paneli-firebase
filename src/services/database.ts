@@ -210,15 +210,16 @@ export class LeaveService {
 
   static async getLeavesByYear(year: number): Promise<LeaveEntry[]> {
     const leavesRef = collection(db, this.collectionName);
-    const q = query(leavesRef, where('year', '==', year), orderBy('weekNumber', 'asc'));
+    const q = query(leavesRef, where('year', '==', year));
     const snapshot = await getDocs(q);
-    
+
     return snapshot.docs
       .map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as LeaveEntry))
-      .filter((l: any) => !l.deleted);
+        id: doc.id,
+        ...doc.data()
+      } as LeaveEntry))
+      .filter((l: any) => !l.deleted)
+      .sort((a, b) => a.weekNumber - b.weekNumber);
   }
 
   static async addLeave(leave: Omit<LeaveEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
