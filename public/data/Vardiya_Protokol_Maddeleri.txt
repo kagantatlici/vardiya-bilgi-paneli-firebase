@@ -1,6 +1,6 @@
 İSTANBUL BOĞAZI
 3. VARDİYA PROTOKOLÜ
-(Son Revizyon Tarihi: 30 Ağustos 2025)
+(Son Revizyon Tarihi: 6 Ocak 2026)
 Madde 01: Vardiya giriş sıralaması, bir önceki vardiya çıkış sırasına sadık
 kalınarak yapılan sıralama olup bu sıralama, her vardiya başında ve her
 istasyon için ayrı ayrı hazırlanır. Örnek: İnciburnu vardiya sırası
@@ -112,10 +112,9 @@ ayrılma pozisyonu olarak düşünülmüştür)
 Madde 23: Gemiden ayrılışlarda, gemiler mümkün olduğunca borda
 bordaya bırakılmaz. Bu durumun oluşmaması için gereken tedbir önceden
 alınır.
-Madde 24: Vardiya çıkış günü (kuzeyden güneye gelirken) saat 10:00'a kadar İnciburnu Kılavuzluk İstasyonunda sürekli 1 kılavuz kaptan nöbetçi olarak bekler.
-İstasyona sonra gelen her kılavuz kaptan kendisinden önce gelen kılavuz kaptandan çıkış nöbetini devralır.
-Çıkış nöbetini devreden kılavuz kaptan vardiyadan ayrılabilir.
-Bu şekilde çıkış günü nöbeti bütün kılavuzlar arasında paylaşılmış olur.
+Madde 24: Vardiya çıkış günü (kuzeyden güneye gelirken) saat 10:00'a kadar İnciburnu Kılavuzluk İstasyonunda sürekli 1 kılavuz kaptan nöbetçi olarak bekler. İstasyona sonra gelen her kılavuz kaptan kendisinden önce gelen kılavuz kaptandan çıkış nöbetini devralır. Çıkış nöbetini devreden kılavuz kaptan vardiyadan ayrılabilir. Bu şekilde çıkış günü nöbeti bütün kılavuzlar arasında paylaşılmış olur.
+****
+​Ancak; olağanüstü hava/deniz koşulları, trafik planlamasındaki belirsizlikler veya yoğun takviye ihtimalinin doğduğu durumlarda; Baş Kılavuz Kaptan’ın talimatıyla "nöbeti devredip ayrılma" uygulaması o vardiya için askıya alınır. Böyle bir talimat verildiğinde, vardiya çıkış saati dolana veya ikinci bir talimata kadar istasyondaki tüm kılavuz kaptanlar göreve hazır şekilde beklerler.
 Madde 25: Vardiya çıkış günü, diğer vardiyanın giriş saati gelmeden, son
 gemisini, diğer vardiyadan başka bir pilota veren kılavuz kaptan, iş yapmış
 kabul edilir. Bu durum, “Herkese Eşit Sayıda Gemi” kuralı kapsamında
