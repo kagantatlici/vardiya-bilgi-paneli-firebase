@@ -7,7 +7,7 @@ interface BonusTableProps {
 
 const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
 
-  // Mevcut tarih referansı (Algoritmalar için)
+  // Mevcut tarih referansı
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -51,17 +51,8 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
               margin: 0,
               lineHeight: "1.2"
             }}>
-              Devlet İkramiyeleri
-            </h1>
-            <p style={{ 
-              fontSize: "11px", 
-              marginTop: "2px", 
-              opacity: 0.9, 
-              margin: "2px 0 0 0",
-              lineHeight: "1.2"
-            }}>
               2026 İkramiye Takvimi
-            </p>
+            </h1>
           </div>
           <div />
         </div>
@@ -112,7 +103,6 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
           {/* Table Rows */}
           <div style={{ padding: "8px 0" }}>
             {bonuses.map((bonus, index) => {
-              // Algoritmalar artık doğrudan compareDate kullanıyor
               const upcoming = isUpcoming(bonus.compareDate);
               const past = isPast(bonus.compareDate);
               
@@ -126,14 +116,13 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
                     gap: "16px",
                     borderBottom: index < bonuses.length - 1 ? "1px solid #f3f4f6" : "none",
                     backgroundColor: upcoming
-                      ? "#f0fdf4" // Yaklaşan: Yeşilimsi arka plan
+                      ? "#f0fdf4"
                       : past
-                      ? "#fafafa" // Geçmiş: Çok açık gri
+                      ? "#fafafa"
                       : "#ffffff",
                     position: "relative",
                   }}
                 >
-                  {/* Status Indicator (Sol taraftaki yeşil şerit) */}
                   {upcoming && (
                     <div
                       style={{
@@ -149,12 +138,11 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
                     />
                   )}
                   
-                  {/* İkramiye Type */}
                   <div
                     style={{
                       fontSize: "14px",
                       fontWeight: "500",
-                      color: past ? "#9ca3af" : "#1f2937", // Geçmişse soluk renk
+                      color: past ? "#9ca3af" : "#1f2937",
                       textAlign: "center",
                       display: "flex",
                       alignItems: "center",
@@ -164,15 +152,14 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
                     {bonus.type}
                   </div>
 
-                  {/* Date */}
                   <div
                     style={{
                       fontSize: "14px",
                       fontWeight: upcoming ? "600" : "400",
                       color: upcoming
-                        ? "#16a34a" // Yaklaşan: Canlı yeşil
+                        ? "#16a34a"
                         : past
-                        ? "#9ca3af" // Geçmiş: Soluk gri
+                        ? "#9ca3af"
                         : "#6b7280",
                       textAlign: "center",
                       display: "flex",
@@ -225,7 +212,6 @@ const BonusTable: React.FC<BonusTableProps> = ({ onBack }) => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
