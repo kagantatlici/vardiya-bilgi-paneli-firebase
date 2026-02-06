@@ -406,7 +406,7 @@ const MainScreen: React.FC = () => {
                 const nextDate = new Date(year, month, dayIndex + 1);
                 const nextShiftNum = getShiftNumber(nextDate);
                 const isLastDay = !nextShiftNum || nextShiftNum !== shiftNum;
-                return isLastDay ? "#ffefa8" : "#fde047";
+                return isLastDay ? "#fff4c5" : "#fde047";
               })() : "#fff",
               outline: isT ? "2px solid #facc15" : undefined,
               outlineOffset: isT ? -2 : undefined,
