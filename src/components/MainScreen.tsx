@@ -512,175 +512,176 @@ const MainScreen: React.FC = () => {
   if (currentView === "protocol") return <ProtocolViewer onBack={goBack} />;
   if (currentView === "bonus") return <BonusTable onBack={goBack} />;
   if (currentView === "leave") return <LeaveManagement onBack={goBack} />;
+  if (currentView === "yearly") {
+    return (
+      <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+        <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px", position: "sticky", top: 0, zIndex: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <button onClick={goBack} style={{ background: "transparent", color: "white", border: "none", fontSize: 16, cursor: "pointer" }}>← Geri</button>
+            <h1 style={{ fontSize: 18, fontWeight: 700 }}>Yıllık Vardiya Takvimi</h1>
+            <div />
+          </div>
+        </header>
+
+        {/* Controls Section */}
+        <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: 16, display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
+          {/* Year Selectors */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+            {[2025, 2026, 2027].map(y => (
+              <button
+                key={y}
+                onClick={() => setYearlyYear(y)}
+                style={{
+                  padding: "6px 16px",
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: yearlyYear === y ? "#2563eb" : "#e5e7eb",
+                  color: yearlyYear === y ? "#fff" : "#374151",
+                  transition: "all 0.2s"
+                }}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+
+          {/* Action Buttons & Color Pickers */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 16, alignItems: 'center' }}>
+            <button onClick={captureYearGrid} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>📷</span> Ekran Görüntüsü Al
+            </button>
+
+            <div style={{ display: "flex", gap: 12, alignItems: "center", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input
+                  type="color"
+                  value={shiftColor}
+                  onChange={(e) => setShiftColor(e.target.value)}
+                  style={{ width: 24, height: 24, padding: 0, border: "none", borderRadius: 4, cursor: "pointer", backgroundColor: "transparent" }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>Vardiya</span>
+              </div>
+              <div style={{ width: 1, height: 20, backgroundColor: "#d1d5db" }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input
+                  type="color"
+                  value={exitColor}
+                  onChange={(e) => setExitColor(e.target.value)}
+                  style={{ width: 24, height: 24, padding: 0, border: "none", borderRadius: 4, cursor: "pointer", backgroundColor: "transparent" }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>Çıkış</span>
+              </div>
+              <div style={{ width: 1, height: 20, backgroundColor: "#d1d5db" }} />
+              <button
+                onClick={() => { setShiftColor("#fde047"); setExitColor("#fff4c5"); }}
+                style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: "0 4px" }}
+                title="Renkleri Sıfırla"
+              >
+                Sıfırla
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div ref={yearlyCaptureRef} style={{ background: '#ffffff', margin: '0 12px 12px', border: '2px solid #111827' }}>
+          <div style={{ textAlign: 'center', fontWeight: 800, fontSize: 18, padding: '10px 8px', borderBottom: '2px solid #111827' }}>{`3. Vardiya ${yearlyYear} Çalışma Takvimi`}</div>
+          {renderYearGrid(yearlyYear)}
+        </div>
+        <div style={{ padding: "0 16px 16px", fontSize: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 16, height: 16, border: "1px solid #111827", background: shiftColor }} />
+            <span>Vardiya Günü</span>
+            <div style={{ width: 16, height: 16, border: "1px solid #111827", background: exitColor, marginLeft: 12 }} />
+            <span>Çıkış Günü</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isInitialized) return <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div><div style={{ fontSize: "16px", fontWeight: "500", color: "#6b7280" }}>Sistem başlatılıyor...</div></div></div>;
+  if (hasError) return <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "24px", marginBottom: "16px" }}>⚠️</div><div style={{ fontSize: "16px", fontWeight: "500", color: "#dc2626" }}>Sistem başlatılamadı. Lütfen yenileyin.</div></div></div>;
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
-      <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px", position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={goBack} style={{ background: "transparent", color: "white", border: "none", fontSize: 16, cursor: "pointer" }}>← Geri</button>
-          <h1 style={{ fontSize: 18, fontWeight: 700 }}>Yıllık Vardiya Takvimi</h1>
-          <div />
-        </div>
-      </header>
-
-      {/* Controls Section */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: 16, display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
-        {/* Year Selectors */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-          {[2025, 2026, 2027].map(y => (
-            <button
-              key={y}
-              onClick={() => setYearlyYear(y)}
-              style={{
-                padding: "6px 16px",
-                borderRadius: 6,
-                fontSize: 14,
-                fontWeight: 600,
-                border: "none",
-                cursor: "pointer",
-                backgroundColor: yearlyYear === y ? "#2563eb" : "#e5e7eb",
-                color: yearlyYear === y ? "#fff" : "#374151",
-                transition: "all 0.2s"
-              }}
-            >
-              {y}
-            </button>
-          ))}
+      <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}><h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center" }}>İstanbul Boğazı 3. Vardiya Bilgilendirme Ekranı</h1></header>
+      <main style={{ padding: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+          <button onClick={() => openExternalLink("https://gemi-trafik-2025.vercel.app/")} style={{ backgroundColor: "#059669", color: "white", padding: "10px 12px", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "52px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>🚢 📊 ANLIK GEMİ SAYILARI</button>
+          <button onClick={() => openExternalLink("https://pilot-sira.vercel.app/")} style={{ backgroundColor: "#2563eb", color: "white", padding: "10px 12px", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "52px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>🇵🇱 Pilotlu Gemi Sıralaması</button>
         </div>
 
-        {/* Action Buttons & Color Pickers */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 16, alignItems: 'center' }}>
-          <button onClick={captureYearGrid} style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>📷</span> Ekran Görüntüsü Al
-          </button>
+        {(() => {
+          const { current, next } = getCurrentAndNextShift();
+          if (!current) return null;
+          const currentCounts = calculateShiftCounts(current.shiftNumber);
+          const nextCounts = next ? calculateShiftCounts(next.shiftNumber) : null;
+          return (
+            <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", marginBottom: "20px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", border: "2px solid #1e40af" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px", fontWeight: "500", color: "#1e40af" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "16px", fontWeight: "600" }}>{current.startDate} ({current.shiftNumber}. Vardiya)</span>
+                  <span>👥 {currentCounts.working} Kılavuz görevde,</span><span>🏠 {currentCounts.onLeave} Kılavuz izinde</span>
+                </div>
+                {next && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", paddingLeft: "16px" }}>
+                    <span>→ →</span><span style={{ fontSize: "16px", fontWeight: "600" }}>{next.startDate} ({next.shiftNumber}. Vardiya)</span>
+                    <span>👥 {nextCounts?.working || 0} Kılavuz görevde,</span><span>🏠 {nextCounts?.onLeave || 0} Kılavuz izinde</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
-          <div style={{ display: "flex", gap: 12, alignItems: "center", backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input
-                type="color"
-                value={shiftColor}
-                onChange={(e) => setShiftColor(e.target.value)}
-                style={{ width: 24, height: 24, padding: 0, border: "none", borderRadius: 4, cursor: "pointer", backgroundColor: "transparent" }}
-              />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>Vardiya</span>
-            </div>
-            <div style={{ width: 1, height: 20, backgroundColor: "#d1d5db" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input
-                type="color"
-                value={exitColor}
-                onChange={(e) => setExitColor(e.target.value)}
-                style={{ width: 24, height: 24, padding: 0, border: "none", borderRadius: 4, cursor: "pointer", backgroundColor: "transparent" }}
-              />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>Çıkış</span>
-            </div>
-            <div style={{ width: 1, height: 20, backgroundColor: "#d1d5db" }} />
-            <button
-              onClick={() => { setShiftColor("#fde047"); setExitColor("#fff4c5"); }}
-              style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: "0 4px" }}
-              title="Renkleri Sıfırla"
-            >
-              Sıfırla
-            </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+          <button onClick={() => navigateTo("leave")} style={{ backgroundColor: "#16a34a", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📅 İzin Yönetimi</button>
+          <button onClick={() => navigateTo("captains")} style={{ backgroundColor: "#7e22ce", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>👨‍✈️ Kılavuz Kaptanlar</button>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
+          <button onClick={() => navigateTo("protocol")} style={{ backgroundColor: "#dc2626", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📄 Vardiya Protokolü</button>
+          <button onClick={() => navigateTo("yearly")} style={{ backgroundColor: "#0891b2", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📊 Yıllık Takvim</button>
+        </div>
+
+        <div style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}>
+          <button onClick={() => openExternalLink("https://kagantatlici.github.io/istanbul-strait-map/")} style={{ backgroundColor: "#92A07F", color: "#111827", padding: "8px 12px", borderRadius: "8px", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", minHeight: "48px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>🗺️ CPA Simülasyonu</button>
+        </div>
+
+        <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <button onClick={goToPreviousMonth} style={{ backgroundColor: "#f3f4f6", border: "none", borderRadius: "8px", padding: "8px 12px", cursor: "pointer" }}>← Önceki</button>
+            <h3 style={{ fontSize: "18px", fontWeight: "600" }}>🗓️ {getMonthName(currentMonth)} {currentYear}</h3>
+            <button onClick={goToNextMonth} style={{ backgroundColor: "#f3f4f6", border: "none", borderRadius: "8px", padding: "8px 12px", cursor: "pointer" }}>Sonraki →</button>
           </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "1px", marginBottom: "4px" }}>
+            {["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"].map(day => <div key={day} style={{ textAlign: "center", fontWeight: "600", color: "#6b7280", fontSize: "12px" }}>{day}</div>)}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "1px", border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>{renderCalendarGrid()}</div>
         </div>
-      </div>
 
-      <div ref={yearlyCaptureRef} style={{ background: '#ffffff', margin: '0 12px 12px', border: '2px solid #111827' }}>
-        <div style={{ textAlign: 'center', fontWeight: 800, fontSize: 18, padding: '10px 8px', borderBottom: '2px solid #111827' }}>{`3. Vardiya ${yearlyYear} Çalışma Takvimi`}</div>
-        {renderYearGrid(yearlyYear)}
-      </div>
-      <div style={{ padding: "0 16px 16px", fontSize: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 16, height: 16, border: "1px solid #111827", background: shiftColor }} />
-          <span>Vardiya Günü</span>
-          <div style={{ width: 16, height: 16, border: "1px solid #111827", background: exitColor, marginLeft: 12 }} />
-          <span>Çıkış Günü</span>
+        <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: "600" }}>💰 Yaklaşan İkramiye</h3>
+            <button onClick={() => navigateTo("bonus")} style={{ backgroundColor: "#ea580c", color: "white", padding: "6px 12px", borderRadius: "6px", border: "none", fontSize: "12px", cursor: "pointer" }}>Tüm İkramiyeler →</button>
+          </div>
+          {(() => {
+            const nextB = getNextUpcomingBonus();
+            return nextB ? (
+              <div style={{ backgroundColor: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#16a34a" }}>{nextB.type}</div>
+                <div style={{ fontSize: "13px", color: "#16a34a" }}>{nextB.date}</div>
+              </div>
+            ) : <div style={{ backgroundColor: "#f3f4f6", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db" }}><div style={{ fontSize: "13px", color: "#6b7280" }}>Henüz belirlenmedi</div></div>;
+          })()}
         </div>
-      </div>
+        <div style={{ marginTop: 12 }}><AuditLogPanel /></div>
+      </main>
     </div>
   );
-}
-
-if (!isInitialized) return <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div><div style={{ fontSize: "16px", fontWeight: "500", color: "#6b7280" }}>Sistem başlatılıyor...</div></div></div>;
-if (hasError) return <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "24px", marginBottom: "16px" }}>⚠️</div><div style={{ fontSize: "16px", fontWeight: "500", color: "#dc2626" }}>Sistem başlatılamadı. Lütfen yenileyin.</div></div></div>;
-
-return (
-  <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
-    <header style={{ backgroundColor: "#1f2937", color: "white", padding: "16px" }}><h1 style={{ fontSize: "18px", fontWeight: "600", textAlign: "center" }}>İstanbul Boğazı 3. Vardiya Bilgilendirme Ekranı</h1></header>
-    <main style={{ padding: "16px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
-        <button onClick={() => openExternalLink("https://gemi-trafik-2025.vercel.app/")} style={{ backgroundColor: "#059669", color: "white", padding: "10px 12px", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "52px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>🚢 📊 ANLIK GEMİ SAYILARI</button>
-        <button onClick={() => openExternalLink("https://pilot-sira.vercel.app/")} style={{ backgroundColor: "#2563eb", color: "white", padding: "10px 12px", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minHeight: "52px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>🇵🇱 Pilotlu Gemi Sıralaması</button>
-      </div>
-
-      {(() => {
-        const { current, next } = getCurrentAndNextShift();
-        if (!current) return null;
-        const currentCounts = calculateShiftCounts(current.shiftNumber);
-        const nextCounts = next ? calculateShiftCounts(next.shiftNumber) : null;
-        return (
-          <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", marginBottom: "20px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", border: "2px solid #1e40af" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px", fontWeight: "500", color: "#1e40af" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "16px", fontWeight: "600" }}>{current.startDate} ({current.shiftNumber}. Vardiya)</span>
-                <span>👥 {currentCounts.working} Kılavuz görevde,</span><span>🏠 {currentCounts.onLeave} Kılavuz izinde</span>
-              </div>
-              {next && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", paddingLeft: "16px" }}>
-                  <span>→ →</span><span style={{ fontSize: "16px", fontWeight: "600" }}>{next.startDate} ({next.shiftNumber}. Vardiya)</span>
-                  <span>👥 {nextCounts?.working || 0} Kılavuz görevde,</span><span>🏠 {nextCounts?.onLeave || 0} Kılavuz izinde</span>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-        <button onClick={() => navigateTo("leave")} style={{ backgroundColor: "#16a34a", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📅 İzin Yönetimi</button>
-        <button onClick={() => navigateTo("captains")} style={{ backgroundColor: "#7e22ce", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>👨‍✈️ Kılavuz Kaptanlar</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
-        <button onClick={() => navigateTo("protocol")} style={{ backgroundColor: "#dc2626", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📄 Vardiya Protokolü</button>
-        <button onClick={() => navigateTo("yearly")} style={{ backgroundColor: "#0891b2", color: "white", padding: "12px 8px", borderRadius: "8px", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minHeight: "80px", fontSize: "14px", cursor: "pointer" }}>📊 Yıllık Takvim</button>
-      </div>
-
-      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}>
-        <button onClick={() => openExternalLink("https://kagantatlici.github.io/istanbul-strait-map/")} style={{ backgroundColor: "#92A07F", color: "#111827", padding: "8px 12px", borderRadius: "8px", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", minHeight: "48px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>🗺️ CPA Simülasyonu</button>
-      </div>
-
-      <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", marginBottom: "16px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-          <button onClick={goToPreviousMonth} style={{ backgroundColor: "#f3f4f6", border: "none", borderRadius: "8px", padding: "8px 12px", cursor: "pointer" }}>← Önceki</button>
-          <h3 style={{ fontSize: "18px", fontWeight: "600" }}>🗓️ {getMonthName(currentMonth)} {currentYear}</h3>
-          <button onClick={goToNextMonth} style={{ backgroundColor: "#f3f4f6", border: "none", borderRadius: "8px", padding: "8px 12px", cursor: "pointer" }}>Sonraki →</button>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "1px", marginBottom: "4px" }}>
-          {["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"].map(day => <div key={day} style={{ textAlign: "center", fontWeight: "600", color: "#6b7280", fontSize: "12px" }}>{day}</div>)}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "1px", border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>{renderCalendarGrid()}</div>
-      </div>
-
-      <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "16px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-          <h3 style={{ fontSize: "16px", fontWeight: "600" }}>💰 Yaklaşan İkramiye</h3>
-          <button onClick={() => navigateTo("bonus")} style={{ backgroundColor: "#ea580c", color: "white", padding: "6px 12px", borderRadius: "6px", border: "none", fontSize: "12px", cursor: "pointer" }}>Tüm İkramiyeler →</button>
-        </div>
-        {(() => {
-          const nextB = getNextUpcomingBonus();
-          return nextB ? (
-            <div style={{ backgroundColor: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
-              <div style={{ fontSize: "14px", fontWeight: "500", color: "#16a34a" }}>{nextB.type}</div>
-              <div style={{ fontSize: "13px", color: "#16a34a" }}>{nextB.date}</div>
-            </div>
-          ) : <div style={{ backgroundColor: "#f3f4f6", padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db" }}><div style={{ fontSize: "13px", color: "#6b7280" }}>Henüz belirlenmedi</div></div>;
-        })()}
-      </div>
-      <div style={{ marginTop: 12 }}><AuditLogPanel /></div>
-    </main>
-  </div>
-);
 };
 
 export default React.memo(MainScreen);
