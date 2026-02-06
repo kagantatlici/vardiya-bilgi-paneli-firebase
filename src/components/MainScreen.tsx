@@ -402,7 +402,12 @@ const MainScreen: React.FC = () => {
             const isT = isToday(date);
             const style: React.CSSProperties = {
               ...cellBase,
-              background: shiftNum ? "#fde047" : "#fff",
+              background: shiftNum ? (() => {
+                const nextDate = new Date(year, month, dayIndex + 1);
+                const nextShiftNum = getShiftNumber(nextDate);
+                const isLastDay = !nextShiftNum || nextShiftNum !== shiftNum;
+                return isLastDay ? "#fef08a" : "#fde047";
+              })() : "#fff",
               outline: isT ? "2px solid #facc15" : undefined,
               outlineOffset: isT ? -2 : undefined,
               color: isSun ? "#dc2626" : undefined,
