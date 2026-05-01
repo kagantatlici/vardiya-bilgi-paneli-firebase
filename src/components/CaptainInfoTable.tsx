@@ -16,13 +16,10 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
   
   const [captains, setCaptains] = useState<Captain[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragMode, setDragMode] = useState<boolean>(false);
+  const [isEditOrderMode, setIsEditOrderMode] = useState<boolean>(false);
   const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [selectedCaptain, setSelectedCaptain] = useState<Captain | null>(null);
-  const longPressTimer = useRef<number | null>(null);
-  const longPressStartTime = useRef<number>(0);
 
   const loadCaptains = useCallback(async () => {
     try {
@@ -42,42 +39,29 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     loadCaptains();
   }, [loadCaptains]);
 
-  // Long press handlers
-  const handleTouchStart = (index: number) => {
-    longPressStartTime.current = Date.now();
-    longPressTimer.current = window.setTimeout(() => {
-      setDragMode(true);
-      setDraggedIndex(index);
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 1500);
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newCaptains = [...captains];
+    const temp = newCaptains[index - 1];
+    newCaptains[index - 1] = newCaptains[index];
+    newCaptains[index] = temp;
+    setCaptains(newCaptains);
   };
 
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      window.clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
-
-  const handleRowClick = (targetIndex: number) => {
-    if (dragMode && draggedIndex !== null && draggedIndex !== targetIndex) {
-      const newCaptains = [...captains];
-      const [draggedItem] = newCaptains.splice(draggedIndex, 1);
-      newCaptains.splice(targetIndex, 0, draggedItem);
-      
-      setCaptains(newCaptains);
-      setDragMode(false);
-      setDraggedIndex(null);
-      setShowSaveModal(true);
-    }
+  const moveDown = (index: number) => {
+    if (index === captains.length - 1) return;
+    const newCaptains = [...captains];
+    const temp = newCaptains[index + 1];
+    newCaptains[index + 1] = newCaptains[index];
+    newCaptains[index] = temp;
+    setCaptains(newCaptains);
   };
 
   const handleSave = async () => {
     try {
       setShowSaveModal(false);
       await CaptainService.updateCaptainOrder(captains);
+      setIsEditOrderMode(false);
       showSuccess("Sıralama değişikliği kaydedildi!");
     } catch (error) {
       console.error('Error saving captain order:', error);
@@ -257,12 +241,46 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           }}>
             Kılavuz Kaptan Bilgileri
           </h1>
-          <div />
+          {isEditOrderMode ? (
+            <button
+              onClick={() => setShowSaveModal(true)}
+              style={{
+                backgroundColor: "#10b981",
+                border: "none",
+                borderRadius: "4px",
+                color: "white",
+                fontSize: "12px",
+                fontWeight: "600",
+                cursor: "pointer",
+                padding: "6px 12px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              💾 Kaydet
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsEditOrderMode(true)}
+              style={{
+                backgroundColor: "#3b82f6",
+                border: "none",
+                borderRadius: "4px",
+                color: "white",
+                fontSize: "12px",
+                fontWeight: "600",
+                cursor: "pointer",
+                padding: "6px 12px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              🔄 Sırala
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Drag Mode Indicator */}
-      {dragMode && (
+      {/* Edit Mode Indicator */}
+      {isEditOrderMode && (
         <div style={{
           backgroundColor: "#fef3c7",
           padding: "8px 16px",
@@ -272,7 +290,7 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           color: "#92400e",
           borderBottom: "1px solid #f59e0b",
         }}>
-          🔄 Taşıma Modu Aktif - Satıra dokunarak yeni konuma taşıyın
+          🔄 Sıralama Modu Aktif - Ok tuşlarını kullanarak sıralamayı değiştirin ve Kaydet'e basın.
         </div>
       )}
 
@@ -332,32 +350,22 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
             <div style={{ textAlign: "left", paddingLeft: "8px" }}>İsim</div>
             <div style={{ textAlign: "center" }}>Sicil</div>
             <div style={{ textAlign: "center" }}>Aktif Ehliyet</div>
-            <div style={{ textAlign: "center" }}>Detay</div>
+            <div style={{ textAlign: "center" }}>{isEditOrderMode ? "Sırala" : "Detay"}</div>
           </div>
 
           {/* Table Rows */}
           {captains.map((captain, index) => (
             <div
               key={captain.id}
-              onTouchStart={() => !dragMode && handleTouchStart(index)}
-              onTouchEnd={handleTouchEnd}
-              onClick={() => dragMode ? handleRowClick(index) : undefined}
               style={{
                 display: "grid",
                 gridTemplateColumns: "50px 2fr 80px 2fr 80px",
                 padding: "12px 8px",
                 fontSize: "12px",
                 borderBottom: index < captains.length - 1 ? "1px solid #f3f4f6" : "none",
-                backgroundColor:
-                  draggedIndex === index && dragMode
-                    ? "#fef3c7"
-                    : index % 2 === 0
-                    ? "#ffffff"
-                    : "#f9fafb",
+                backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
                 minHeight: "60px",
                 alignItems: "center",
-                cursor: dragMode ? "pointer" : "default",
-                boxShadow: draggedIndex === index && dragMode ? "0 4px 6px rgba(0,0,0,0.1)" : "none",
               }}
             >
               {/* No */}
@@ -417,33 +425,68 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
                 ))}
               </div>
 
-              {/* Detay */}
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDetailClick(captain);
-                  }}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "4px 8px",
-                    fontSize: "10px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "2px",
-                    justifyContent: "center",
-                  }}
-                  onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#2563eb"}
-                  onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#3b82f6"}
-                >
-                  <span>👁</span>
-                  <span>Detay</span>
-                </button>
+              {/* Detay / Sırala */}
+              <div style={{ textAlign: "center", display: "flex", justifyContent: "center", gap: "4px" }}>
+                {isEditOrderMode ? (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveUp(index); }}
+                      disabled={index === 0}
+                      style={{
+                        backgroundColor: index === 0 ? "#d1d5db" : "#4b5563",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                        cursor: index === 0 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveDown(index); }}
+                      disabled={index === captains.length - 1}
+                      style={{
+                        backgroundColor: index === captains.length - 1 ? "#d1d5db" : "#4b5563",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                        cursor: index === captains.length - 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      ↓
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDetailClick(captain);
+                    }}
+                    style={{
+                      backgroundColor: "#3b82f6",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "4px 8px",
+                      fontSize: "10px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "2px",
+                      justifyContent: "center",
+                    }}
+                    onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = "#2563eb"}
+                    onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = "#3b82f6"}
+                  >
+                    <span>👁</span>
+                    <span>Detay</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -459,7 +502,8 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
           color: "#1e40af",
         }}>
           <div style={{ fontWeight: "600", marginBottom: "4px" }}>💡 Kullanım:</div>
-          <div>• Satıra 1.5 saniye basılı tutarak sıralama değiştirebilirsiniz</div>
+          <div>• Üstteki "Sırala" butonuna basarak sıralama moduna geçebilirsiniz</div>
+          <div>• Sıralama modundayken sağdaki okları (↑ ↓) kullanarak yer değiştirebilirsiniz</div>
           <div>• Detay butonuna tıklayarak pilot bilgilerini görüntüleyebilirsiniz</div>
         </div>
         </div>
