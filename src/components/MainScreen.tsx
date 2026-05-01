@@ -172,8 +172,8 @@ const MainScreen: React.FC = () => {
           displayShiftNumber = shift.shiftNumber;
         } else if (shift.year === 2026) {
           displayShiftNumber = shift.shiftNumber <= 61 ? shift.shiftNumber : shift.shiftNumber - 61;
-        } else if (shift.year === 2027) {
-          displayShiftNumber = shift.shiftNumber <= 122 ? shift.shiftNumber - 61 : shift.shiftNumber - 122;
+                } else if (shift.year === 2027) {
+          displayShiftNumber = shift.shiftNumber - 121;
         }
         shifts[shift.date] = displayShiftNumber;
       });
