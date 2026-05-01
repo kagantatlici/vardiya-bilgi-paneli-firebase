@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 import { CaptainService } from "../services/database";
