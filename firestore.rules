@@ -22,7 +22,7 @@ service cloud.firestore {
     match /captains/{id} {
       allow create: if true;
       allow update: if changedKeys().hasOnly([
-        'isim', 'aisMobNo', 'aktifEhliyetler', 'notlar', 'tumEhliyetler', 'melbusat',
+        'isim', 'sicilNo', 'aisMobNo', 'aktifEhliyetler', 'notlar', 'tumEhliyetler', 'melbusat',
         'durum', 'siraNo', 'updatedAt', 'deleted', 'deletedAt', 'deletedByName'
       ]);
     }
