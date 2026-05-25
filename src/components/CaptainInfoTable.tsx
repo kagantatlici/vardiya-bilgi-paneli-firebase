@@ -115,34 +115,11 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
   const handleDeleteCaptain = async () => {
     if (selectedCaptain && window.confirm(`${selectedCaptain.isim || 'Bu pilot'} silinsin mi?`)) {
       try {
-        const emptyCaptain: Captain = {
-          ...selectedCaptain,
-          sicilNo: "",
-          isim: "",
-          aisMobNo: "",
-          notlar: "",
-          aktifEhliyetler: [],
-          durum: "Pasif",
-          tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
-          melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" }
-        };
+        await CaptainService.deleteCaptain(selectedCaptain.id);
 
-        await CaptainService.updateCaptain(selectedCaptain.id, {
-          sicilNo: "",
-          isim: "",
-          aisMobNo: "",
-          notlar: "",
-          aktifEhliyetler: [],
-          durum: "Pasif",
-          tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
-          melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" }
-        });
-
-        setCaptains(prev => prev.map(captain => 
-          captain.id === selectedCaptain.id ? emptyCaptain : captain
-        ));
+        setCaptains(prev => prev.filter(captain => captain.id !== selectedCaptain.id));
         
-        showError("Pilot silindi!");
+        showSuccess("Pilot silindi!");
       } catch (error) {
         console.error('Error deleting captain:', error);
         showError('Pilot silinirken hata oluştu!');
