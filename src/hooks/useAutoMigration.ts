@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { CaptainService } from '../services/database';
-import { migrateAllData } from '../scripts/migrate-data';
 
 export function useAutoMigration() {
   const [isInitialized, setIsInitialized] = useState(false);
