@@ -24,9 +24,11 @@ export function useAutoMigration() {
           try {
             const existingCaptains = await CaptainService.getAllCaptains();
             
-            // Only migrate if truly no data exists AND migration never ran
             if (existingCaptains.length === 0) {
-              await migrateAllData();
+              // DİKKAT: migrateAllData() çağrısı güvenlik nedeniyle iptal edilmiştir.
+              // Eğer veritabanı boşsa manuel olarak işlem yapılmalıdır.
+              // await migrateAllData();
+              
               // Mark migration as completed so it never runs again
               localStorage.setItem('firebase-migration-completed', 'true');
             } else {

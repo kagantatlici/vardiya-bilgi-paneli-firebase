@@ -153,6 +153,33 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
     }
   };
 
+  const handleAddCaptain = async () => {
+    try {
+      const newCaptain = {
+        sicilNo: "",
+        isim: "Yeni Kaptan",
+        aisMobNo: "",
+        notlar: "",
+        aktifEhliyetler: [],
+        tumEhliyetler: { istanbul: false, canakkale: false, hpasa: false, kepez: false, izmir: false, mersin: false, zonguldak: false },
+        melbusat: { pantolon: "", gomlek: "", tshirt: "", yelek: "", polar: "", mont: "", ayakkabi: "" },
+        durum: "Pasif" as const,
+        siraNo: captains.length + 1
+      };
+
+      const newId = await CaptainService.addCaptain(newCaptain);
+      const addedCaptain: Captain = { id: newId, ...newCaptain };
+      
+      setCaptains(prev => [...prev, addedCaptain]);
+      setSelectedCaptain(addedCaptain);
+      setShowDetailModal(true);
+      showSuccess("Yeni kaptan eklendi, bilgilerini düzenleyebilirsiniz.");
+    } catch (error) {
+      console.error('Error adding captain:', error);
+      showError('Yeni kaptan eklenirken hata oluştu!');
+    }
+  };
+
   const handleCaptainFieldChange = useCallback((field: keyof Captain, value: string | string[] | Captain['durum']) => {
     if (selectedCaptain) {
       setSelectedCaptain({
@@ -276,6 +303,22 @@ const CaptainInfoTable: React.FC<CaptainInfoTableProps> = ({ onBack }) => {
               🔄 Sırala
             </button>
           )}
+          <button
+            onClick={handleAddCaptain}
+            style={{
+              backgroundColor: "#10b981",
+              border: "none",
+              borderRadius: "4px",
+              color: "white",
+              fontSize: "12px",
+              fontWeight: "600",
+              cursor: "pointer",
+              padding: "6px 12px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            + Yeni Ekle
+          </button>
         </div>
       </header>
 
